@@ -31,9 +31,9 @@ function stream_of_iterates(next, value) {
     return pair(value,
                 () => stream_of_iterates(next, next(value)));
 }
-```js
-Example: compute stream of natural numbers
 ```
+Example: compute stream of natural numbers
+```js
 const integers = stream_of_iterates(x => x + 1, 0);
 eval_stream(integers, 10);
 ```
@@ -69,12 +69,12 @@ function map_streams(f, s1, s2) {
 ```
 Now we are ready to construct our stream of π approximations.
 ```js
-const archimedean_pi_sequence =
+const archimedean_π_sequence =
     map_streams(semi_perimeter, side_lengths, side_numbers);
 ```
 Look at the approximations of π:    
 ```js
-eval_stream(archimedean_pi_sequence, 26);
+eval_stream(archimedean_π_sequence, 26);
 ```
 Can we converge faster?
 
@@ -124,7 +124,7 @@ function richardson_sequence(seq, p, q) {
 ```
 We accelerate the approximation of π with with Richardson's method.
 ```js
-eval_stream(richardson_sequence(archimedean_pi_sequence, 2, 2), 7);
+eval_stream(richardson_sequence(archimedean_π_sequence, 2, 2), 7);
 ```
 
 ## Completing the Richardson toolbox
@@ -271,24 +271,24 @@ Let us take another jab at estimating π. The integral of *f* from 0 to 1 is π,
 function f(x) {
     return 4 / (1 + x * x);
 }
-const pi_estimator = trapezoid(f, 0, 1);
+const π_estimator = trapezoid(f, 0, 1);
 ```
 Examples: Use 10 and 10000 intervals
 ```js
-pi_estimator(10);
-pi_estimator(10000);
+π_estimator(10);
+π_estimator(10000);
 ```
 We turn a given estimator into a sequence...
 ```js
-function pi_estimator_sequence(n) {
-    return pair(pi_estimator(n),
-                () => pi_estimator_sequence(2 * n));
+function π_estimator_sequence(n) {
+    return pair(π_estimator(n),
+                () => π_estimator_sequence(2 * n));
 }
 ```
 ...and accelerate its convergence using Richardson's method. For example,
 here is how we accelerate the π estimator.
 ```js
-eval_stream(richardson_sequence(pi_estimator_sequence(10), 2, 2), 11);
+eval_stream(richardson_sequence(π_estimator_sequence(10), 2, 2), 11);
 ```
 Romberg's method avoids unnecessary recomputation of the function. We start with
 a utility function for computing the sum of *f(i)* where *i* goes 
