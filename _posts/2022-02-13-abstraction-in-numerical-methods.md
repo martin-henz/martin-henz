@@ -2,6 +2,7 @@
 
 This is a JavaScript adaptation of the Scheme programs in the MIT AI Memo 997:
 > [Abstraction in Numerical Methods](https://dspace.mit.edu/handle/1721.1/6060)
+
 by Matthew Halfant and Gerald Jay Sussman. Click [here for the full JavaScipt](https://share.sourceacademy.org/81n6d) program,
 but make sure you read the paper along with the JavaScript functions.
 
@@ -13,16 +14,15 @@ we can compute the length of the secant of
 a "refine"ment: the length of the secant whose angle
 is half the orginal (in the example, the secant of
 dodecagon).
-```
+```javascript
 function refine_by_doubling(s) { // s is a side
     return s / math_sqrt(2 + math_sqrt(4 - s * s));
 }
 ```
-
 The function `stream_of_iterates` takes a unary function next and a value
 as arguments and returns the stream that results from
 iterated applications of next to the value
-```
+```js
 function stream_of_iterates(next, value) {
     return pair(value,
                 () => stream_of_iterates(next, next(value)));
