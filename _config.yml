@@ -18,7 +18,7 @@ theme: "minima"
 
 kramdown:
   syntax_highlighter_opts:
-    disable: true
+    disable: false
     
 plugins:
   - jekyll-feed
