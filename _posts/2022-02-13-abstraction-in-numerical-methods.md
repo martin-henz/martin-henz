@@ -87,7 +87,7 @@ function make_zeno_sequence(R, h) {
     return pair(R(h), () => make_zeno_sequence(R, h / 2));
 }
 ```
-Example: `R` is the identity function
+For example if `R` is the identity function, we just get 1, 1/2, 1/4,...
 ```js
 const two_power_fractions = make_zeno_sequence(x => x, 1);
 // eval_stream(two_power_fractions, 10);
