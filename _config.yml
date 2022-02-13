@@ -33,4 +33,4 @@ defaults:
       path: ""
       type: post
     values:
-      tags: Other MIT_AI_Memo
+      tags: Other
