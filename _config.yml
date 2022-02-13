@@ -12,7 +12,7 @@ facebook_username: "martin.schmidden.henz"
 #########################################################################################
 ######### Nothing below needs to be changed (unless you know what you're doing) #########
 #########################################################################################
-# theme: jekyll-theme-midnight
+theme: "minima"
 
 # rss: rss
 
