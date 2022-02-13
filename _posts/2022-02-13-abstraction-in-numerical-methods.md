@@ -1,3 +1,7 @@
+---
+tags: MIT_AI_Memo
+---
+
 # Abstraction in Numerical Methods
 
 This is a JavaScript adaptation of the Scheme programs in the MIT AI Memo 997:
