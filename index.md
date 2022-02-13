@@ -1,5 +1,3 @@
-Here you can say lots of fun things about your site.
+> Any application that can be written in JavaScript, will eventually be written in JavaScript.
 
-Maybe say a some things about yourself.
-
-Or maybe what you plan to blog about.
+Atwood’s Law
