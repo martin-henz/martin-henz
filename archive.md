@@ -8,7 +8,7 @@ title: Blog Archive
   <ul>
     {% for post in tag[1] %}
       <li>
-           <a href="{{ site.baseurl }}martin-henz/{{ post.url }}">{{ post.date | date: "%B %Y" }} - {{ post.title }}</a>
+           <a href="{{ site.baseurl }}{{ post.url }}">{{ post.date | date: "%B %Y" }} - {{ post.title }}</a>
       </li>
     {% endfor %}
   </ul>
