@@ -30,7 +30,7 @@ titles_from_headings:
 
 defaults:
   - scope:
-      path: ""
+      path: "martin-henz"
       type: post
     values:
       tags: Other
