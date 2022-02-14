@@ -185,11 +185,13 @@ function diff_quot_stream(f, x, h) {
                 () => diff_quot_stream(f, x, h / 2));
 }
 ```
-Example:
+Observe what happens when we compute the first 55 values. 
+The values first appear to converge to the correct value 0.5, but then diverge
+and finally settle on 0. Consult the memo for an explanation.
 ```js
 eval_stream(diff_quot_stream(math_sqrt, 1, 0.1), 55);
 ```
-We provide a modified version of `stream_limit`: taking an optional parameter
+To address the issue, we provide a modified version of `stream_limit`: taking an optional parameter
 the specifies the maximal number of stream terms to examine...
 ```js
 function stream_limit_opt(s, tolerance, ...opts) {
@@ -246,7 +248,7 @@ function rderiv(f, tolerance) {
 ```
 Example: Compute the derivative of the square root function at value 1
 ```js
-(rderiv(math_sqrt, 1e-13))(1);
+rderiv(math_sqrt, 1e-13)(1);
 ```
 
 ## Numerical integration by Romberg's method
