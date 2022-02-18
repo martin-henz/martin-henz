@@ -59,7 +59,7 @@ make computer programs understandable, and the Y combinator is
 specifically designed to work without them, to prove the point Curry was making.
 
 Consider a conventional implementation of the factorial function in JavaScript,
-using a constant declaration:
+using a [constant declaration](https://share.sourceacademy.org/fzdsl):
 ```js
 const recursive_fact = n => n <= 1 ? 1 : n * recursive_fact(n - 1);
 ```
@@ -70,7 +70,7 @@ The `recursive_fact` function refers to `recursive_fact` within its own body.
 How can we
 recursively call the factorial function without creating a reference to
 the factorial function? The first idea is to pass the factorial function as
-a parameter, and have a function which returns the factorial function
+a parameter, and have [a function which returns the factorial function](https://share.sourceacademy.org/9vupa)
 rather than declare it.
 ```js
 const make_fact =
@@ -105,7 +105,7 @@ which will make another `try_fact` using `make_fact` and try again.
 Eventually `make_fact` will be able to return a factorial function which doesn't
 use `given_fact`, which can then be used to find a `given_fact`, and that used to
 find another `given_fact`, and so on. Using `make_real_fact` we can compute
-the factorial function as follows.
+the factorial function [as follows](https://share.sourceacademy.org/7l5a8).
 ```js
 make_real_fact(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 ```
@@ -124,7 +124,7 @@ rid of all declarations.
 Another function needs to be created to keep on cycling through `try_fact`-`next_try_fact`,
 without `try_fact` having to reference itself.
 The `get_next_try_fact` function will return the next `try_fact` function to `try_fact`,
-so it doesn't have to refer to itself.
+so it doesn't have to refer to itself, [as shown here](https://share.sourceacademy.org/efg1e):
 ```js
 const make_real_fact =
     make_fact => {
@@ -146,8 +146,8 @@ Instead of `try_fact` passing itself to `make_fact` until it isn't needed it cal
 
 But now `get_next_try_fact` needs to refer to itself, so we need a way to refer to
 `get_next_try_fact` without declaring it.
-This is done by passing `get_next_try_fact` to itself as a parameter, and is the
-final adjustment needed to remove all self-referencing functions.
+This is done by passing `get_next_try_fact` to itself as a parameter, and is
+[the final adjustment](https://share.sourceacademy.org/l2w8x) needed to remove all self-referencing functions.
 ```js
 const make_real_fact =
     make_fact => {
@@ -176,9 +176,9 @@ Obviously declarations are still used though, so now we need to eliminate them.
 From here on the function gets much less readable, but we show that it truly doesn't
 need variable declarations, and thus show how it is equivalent to the Y function above.
 
-First the `try_fact` function is passed directly to `make_fact`, without being declared.
+First the `try_fact` function [is passed directly](https://share.sourceacademy.org/05tas) to `make_fact`, without being declared.
 ```js
-const makeRealFact =
+const make_real_fact =
     make_fact => {
         const get_next_try_fact =
             get_next_try_fact_ref => {
@@ -186,7 +186,7 @@ const makeRealFact =
                     make_fact(n => {
                                   const next_try_fact =
                                       get_next_try_fact_ref(get_next_try_fact_ref);
-                                  const result = nextTryFact(n);
+                                  const result = next_try_fact(n);
                                   return result;
                               });
                 return next_try_fact;
@@ -194,7 +194,7 @@ const makeRealFact =
         return get_next_try_fact(get_next_try_fact);
     };
 ```
-Next the inner-most next_try_fact function is used to generate a result without being declared.
+Next the inner-most next_try_fact function is used to generate a result [without being declared](https://share.sourceacademy.org/e9alg).
 ```js
 const make_real_fact =
     make_fact => {
@@ -212,7 +212,7 @@ const make_real_fact =
         return get_next_try_fact(get_next_try_fact);
     };
 ```    
-Next the `result` is returned without being declared.
+Next the `result` is returned [without being declared](https://share.sourceacademy.org/ok3ki).
 ```js
 const make_real_fact =
     make_fact => {
@@ -220,14 +220,13 @@ const make_real_fact =
 	    get_next_try_fact_ref => {
                 const next_try_fact =
 		    make_fact(n => get_next_try_fact_ref(
-				       get_next_try_fact_ref)(n);
-                              });
+				       get_next_try_fact_ref)(n));
                 return next_try_fact;
             };
         return get_next_try_fact(get_next_try_fact);
     };
 ```
-Next the outer `next_try_fact` function is returned directly without being declared.
+Next the outer `next_try_fact` function is returned directly [without being declared](https://share.sourceacademy.org/zd0xe).
 ```js
 const make_real_fact =
     make_fact => {
@@ -238,9 +237,9 @@ const make_real_fact =
         return get_next_try_fact(get_next_try_fact);
     };
 ```
-Because getNextTryFact is used twice on the same line a label is needed to refer to
+Because	`get_next_try_fact` is used twice on the same line a label is needed to refer to
 the same thing twice. This has to be done by passing it to a function as a parameter,
-so the parameter can be used as a label to refer to the same thing twice.
+so the parameter [can be used as a label to refer to the same thing twice](https://share.sourceacademy.org/i0j9y).
 ```js
 const make_real_fact =
     make_fact => {
@@ -253,7 +252,7 @@ const make_real_fact =
                (get_next_try_fact);
     };
 ```
-Finally the `get_next_try_fact` function is passed directly to the nameless function
+Finally the `get_next_try_fact` function is [passed directly to the nameless function](https://share.sourceacademy.org/t8sjo)
 which calls `get_next_try_fact` on itself to start the recursion going.
 ```js
 const make_real_fact =
@@ -278,28 +277,27 @@ const Y = f => (g => g(g))(g => f(y => g(g)(y)));
 Although we made it for the factorial function the Y combinator can be used for any
 recursive function, showing that recursion can be done without variables and thus
 without any side-effects. The same y combinator function can be used to make a
-factorial function...
+[factorial function](https://share.sourceacademy.org/9yscv)...
 ```js
 const make_fact = given_fact =>
                       n => n <= 1 ? 1 : n * given_fact(n - 1);
 const fact = Y(make_fact);
 display(fact(5)); // Outputs 120
 ```
-...and a fibonacci function:
+...and a [fibonacci function](https://share.sourceacademy.org/zipno):
 ```js
-var make_fib = given_fib =>
+const make_fib = given_fib =>
                    n => n <= 2 ? 1 : given_fib(n - 1) + given_fib(n - 2);
 const fibonacci = Y(make_fib);
 display(fibonacci(5)); // Outputs 5
 ```
-Or, if you want to get rid of all declarations completely:
+Or, if you want to [get rid of all declarations completely](https://share.sourceacademy.org/dzpvt):
 ```js
-Y => {
+(Y => {
     display(Y(given_fact =>
                   n => n <= 1 ? 1 : n * given_fact(n - 1))(5));
     display(Y(given_fib =>
                   n => n <= 2 ? 1 : given_fib(n - 1) + given_fib(n - 2))(5));
-}(f => (g => g(g))(g => f(y => g(g)(y))));
+})(f => (g => g(g))(g => f(y => g(g)(y))));
 ```
 Not a declaration in sight!
-
