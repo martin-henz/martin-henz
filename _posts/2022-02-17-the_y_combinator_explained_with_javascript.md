@@ -6,7 +6,7 @@ tags: Random
 
 ## The What of Y
 
-The following JavaScript expression is called the applicative-order Y combinator
+The following JavaScript expression is called the *applicative-order Y combinator*
 ```js
 f => (g => g(g))(g => f(y => g(g)(y)))
 ```
@@ -21,11 +21,11 @@ Y combinator allows
 us to express recursive algorithms in a sublanguage of JavaScript that does not include
 declarations.
 Take for example the factorial function, and recall
-`5! = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `4!` as follows:
-```js
+`factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `factorial(5)` as follows:
+[```js
 Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 // returns 5! = 120
-```
+```](
 
 ## The How of Y
 
