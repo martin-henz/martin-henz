@@ -275,8 +275,9 @@ and we have the Y combinator function as it was given above.
 const Y = f => (g => g(g))(g => f(y => g(g)(y)));
 ```
 Although we made it for the factorial function the Y combinator can be used for any
-recursive function, showing that recursion can be done without variables and thus
-without any side-effects. The same y combinator function can be used to make a
+recursive function, showing that recursion can be done without declarations, just with
+lambda expressions and function application.
+The same Y combinator can be used to make a
 [factorial function](https://share.sourceacademy.org/9yscv)...
 ```js
 const make_fact = given_fact =>
