@@ -25,7 +25,7 @@ Take for example the factorial function, and recall
 [```js
 Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 // returns 5! = 120
-```](
+```](https://share.sourceacademy.org/01tj0)
 
 ## The How of Y
 
