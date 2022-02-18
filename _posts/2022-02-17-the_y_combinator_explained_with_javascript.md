@@ -21,11 +21,12 @@ Y combinator allows
 us to express recursive algorithms in a sublanguage of JavaScript that does not include
 declarations.
 Take for example the factorial function, and recall
-`factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `factorial(5)` as follows:
-[```js
+`factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `factorial(5)`
+[as follows](https://share.sourceacademy.org/01tj0) (click on the link to run the program, also in rest of this post):
+```js
 Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 // returns 5! = 120
-```](https://share.sourceacademy.org/01tj0)
+```
 
 ## The How of Y
 
