@@ -14,8 +14,8 @@ What is interesting about this incomprehensible mess of lambda expressions, whic
 includes something as strange as `g(g)` not once but twice?
 
 The first Y combinators were conceived by [Haskell Curry](https://en.wikipedia.org/wiki/Haskell_Curry)
-to show that a minimal language consisting just of expressions `E`
-of the forms `x => E` (lambda abstraction) and `E1(E2)` (function application)
+to show that a minimal language (called the *lambda calculus*) consisting just of expressions `E`
+of the forms `x => E` (that we call here *lambda abstraction*) and `E1(E2)` (*function application*)
 in principle suffices to express every algorithm. More specifically, the applicative-order
 Y combinator allows
 us to express recursive algorithms in a sublanguage of JavaScript that does not include
@@ -38,8 +38,8 @@ If `Y` has this property, we can compute `5!` by applying `Y` to the following f
 ```js
 given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1)
 ```
-Now `Y(f)(n)` leads to `f(E)(n)`, and the recursive call `given_fact(n - 1)` in `f`
-will become `E(n - 1)`, which will become `f(E)(n - 1)`, and so on, until we reach
+Now `Y(f)(5)` leads to `f(E)(5)`, and the recursive call `given_fact(5 - 1)` in `f`
+will become `E(5 - 1)`, which will become `f(E)(4)`, and so on, until we reach
 the base case `n <= 1`, which leads to 1 and `E` is no more needed. Then we only need
 to carry out the accumulated multiplications `5 * (4 * (3 * (2 * 1)))` to obtain the correct
 result 120.
@@ -170,11 +170,11 @@ Now we have a function which can make a factorial function using the `make_fact`
 function recursively, without ever needing to refer to its own variables/functions
 via labels; everything can be accessed via parameters. (`get_next_try_fact_ref` is a
 reference to the `get_next_try_fact` function, maintained using parameters rather
-than a variable declaration.)
+than a declaration.)
 
 Obviously declarations are still used though, so now we need to eliminate them.
 From here on the function gets much less readable, but we show that it truly doesn't
-need variable declarations, and thus show how it is equivalent to the Y function above.
+need declarations, and thus show how it is equivalent to the Y function above.
 
 First the `try_fact` function [is passed directly](https://share.sourceacademy.org/05tas) to `make_fact`, without being declared.
 ```js
@@ -276,7 +276,7 @@ const Y = f => (g => g(g))(g => f(y => g(g)(y)));
 ```
 Although we made it for the factorial function the Y combinator can be used for any
 recursive function, showing that recursion can be done without declarations, just with
-lambda expressions and function application.
+lambda abstractions and function application.
 The same Y combinator can be used to make a
 [factorial function](https://share.sourceacademy.org/9yscv)...
 ```js
@@ -302,3 +302,8 @@ Or, if you want to [get rid of all declarations completely](https://share.source
 })(f => (g => g(g))(g => f(y => g(g)(y))));
 ```
 Not a declaration in sight!
+
+In our examples, we used numbers, `+`, `-`, and `*`, which are not part of the lambda calculus.
+The inventor of the lambda calculus, [Alonzo Church](https://en.wikipedia.org/wiki/Alonzo_Church),
+showed how these can be expressed also
+using just lambda abstraction and function application.
