@@ -2,32 +2,30 @@
   <data class="u-url" href="{{ "/" | relative_url }}"></data>
 
   <div class="wrapper">
-
     <div class="footer-col-wrapper">
       <div class="footer-col">
-        <p>{{ site.description | escape }}</p>
+	{%- if site.author %}
+        <ul class="contact-list">
+          <li class="p-name">{{ site.author | escape }}</li>
+          {% if site.email -%}
+          <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+          {%- endif %}
+        </ul>
+	{%- endif %}
+      </div>
+      <div class="footer-col">
         <p class="feed-subscribe">
           <a href="{{ 'feed.xml' | relative_url }}">
             <svg class="svg-icon orange">
               <use xlink:href="{{ 'assets/minima-social-icons.svg#rss' | relative_url }}"></use>
-            </svg><span>Subscribe</span>
+            </svg><span>{{ site.description | escape }}</span>
           </a>
         </p>
       </div>
       <div class="footer-col">
-       {%- if site.author %}
-        <ul class="contact-list">
-            <li class="p-name">{{ site.author | escape }}</li>
-          {% if site.email -%}
-            <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
-          {%- endif %}
-        </ul>
-      {%- endif %}
-      </div>
-    </div>
-    <div class="footer-col">
-      <div class="social-links">
-        {%- include social.html -%}
+        <div class="social-links">
+          {%- include social.html -%}
+        </div>
       </div>
     </div>
   </div>
