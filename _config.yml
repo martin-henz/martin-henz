@@ -9,7 +9,7 @@ github_username: "martin-henz"
 linkedin_username: "martin-henz"
 # facebook_username: "martin.schmidden.henz"
 
-favicon: images/favicon.ico
+favicon: /images/favicon.ico
 
 #########################################################################################
 ######### Nothing below needs to be changed (unless you know what you're doing) #########
