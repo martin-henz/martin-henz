@@ -5,20 +5,20 @@
 <div class="post_navi">
   {%- if page.previous.url -%}
   <a class="post_navi-item nav_prev" href="{{ previousurl }}" title="{{ page.previous.title }}">
-    <div class="post_navi-arrow">&lt;<span>{{ page.previous.title }}</span></div>
+    <span class="post_navi-arrow">&lt;&nbsp;<span>{{ page.previous.title }}</span></span>
   </a>
   {%- else -%}
   <a class="post_navi-item nav_prev" href="{{ 'archive.html' | absolute_url }}" title="Blog Archive">
-    <div class="post_navi-arrow">&lt;<span>Archive of all previous blog posts</span></div>
+    <span class="post_navi-arrow">&lt;&nbsp;<span>Archive of all previous blog posts</span></span>
   </a>
   {%- endif -%}
   {%- if page.next.url -%}
   <a class="post_navi-item nav_next" href="{{ nexturl }}" title="{{ page.next.title }}">
-    <div class="post_navi-arrow">&gt;<span>{{ page.next.title }}</span></div>
+    <span class="post_navi-arrow">&gt;&nbsp;<span>{{ page.next.title }}</span></span>
   </a>
   {%- else -%}
   <a class="post_navi-item nav_next" href="{{ 'archive.html' | absolute_url }}" title="Blog Archive">
-    <div class="post_navi-arrow">&gt;<span>Archive of all previous blog posts</span></div>
+    <span class="post_navi-arrow">&gt;&nbsp;<span>Archive of all previous blog posts</span></span>
   </a>
   {%- endif -%}
 </div>
