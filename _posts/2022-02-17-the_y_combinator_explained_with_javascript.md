@@ -13,7 +13,7 @@ f => (g => g(g))(g => f(y => g(g)(y)))
 What is interesting about this incomprehensible mess of lambda expressions, which
 includes something as strange as `g(g)` not once but twice?
 
-The first Y combinators were conceived by [Haskell Curry](https://en.wikipedia.org/wiki/Alonzo_Church)
+The first Y combinators were conceived by [Haskell Curry](https://en.wikipedia.org/wiki/Haskell_Curry)
 to show that a minimal language consisting just of expressions `E`
 of the forms `x => E` (lambda abstraction) and `E1(E2)` (function application)
 in principle suffices to express every algorithm. More specifically, the applicative-order
@@ -23,7 +23,7 @@ declarations.
 Take for example the factorial function, and recall
 `factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `factorial(5)`
 [as follows](https://share.sourceacademy.org/01tj0) (click on the link to run the program, also in rest of this post):
-```js
+```js 
 Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 // returns 5! = 120
 ```
@@ -185,7 +185,7 @@ const make_real_fact =
                 const next_try_fact =
                     make_fact(n => {
                                   const next_try_fact =
-                                      get_next_try_fact_ref(get_next_try_fact_ref);
+                                    get_next_try_fact_ref(get_next_try_fact_ref);
                                   const result = next_try_fact(n);
                                   return result;
                               });
