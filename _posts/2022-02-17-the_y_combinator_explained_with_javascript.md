@@ -21,7 +21,7 @@ Y combinator allows
 us to express recursive algorithms in a sublanguage of JavaScript that does not include
 declarations.
 Take for example the factorial function, and recall
-`factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the Y combinator, we can compute `factorial(5)`
+`factorial(5) = 5 * 4 * 3 * 2 * 1 = 24`. Using the applicative-order Y combinator as `Y`, we can compute `factorial(5)`
 [as follows](https://share.sourceacademy.org/01tj0) (click on the link to run the program, also in rest of this post):
 ```js 
 Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
@@ -30,10 +30,11 @@ Y(given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1))(5);
 
 ## The How of Y
 
-But how does this Y combinator achieve this? The property needed in a language that
-uses applicative-order reduction, such as JavaScript, is as follows:
-An application `Y(f)` where `f` is a lambda abstraction should lead to some lambda
-abstraction `E` such that `E(n)` leads to `f(E)(n)`.
+But how does this Y applicative-order combinator achieve this? The property needed in a language that
+uses applicative-order reduction, such as JavaScript and most other popular programming languages,
+is as follows:
+An application `Y(f)` where `f` is a lambda abstraction should lead after some function applications
+to a lambda abstraction `E` such that `E(x)` leads to `f(E)(x)`.
 If `Y` has this property, we can compute `5!` by applying `Y` to the following function as `f`:
 ```js
 given_fact => n => n <= 1 ? 1 : n * given_fact(n - 1)

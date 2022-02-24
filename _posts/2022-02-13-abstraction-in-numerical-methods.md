@@ -23,9 +23,9 @@ function refine_by_doubling(s) { // s is a side
     return s / math_sqrt(2 + math_sqrt(4 - s * s));
 }
 ```
-The function `stream_of_iterates` takes a unary function next and a value
+The function `stream_of_iterates` takes a unary function `next` and a `value`
 as arguments and returns the stream that results from
-iterated applications of next to the value
+iterated applications of `next` to `value`
 ```js
 function stream_of_iterates(next, value) {
     return pair(value,
