@@ -101,8 +101,8 @@ which is a function that takes a wave as argument and returns a wave.
 It is interesting to note that white noise as implemented above
 is invariant under any `fast_forward` function.
 ```js
-play_wave(noise, 2);
-play_wave(fast_forward(2)(noise), 2);
+play_wave(noise, 1);
+play_wave(fast_forward(2)(noise), 1);
 ```
 The function `delay` returns a wave transformer
 that delays a given wave by a given number of seconds, and
@@ -158,7 +158,7 @@ play_wave(interference_2, 1);
 ```
 If two waves are to be combined sequentially and if they
 don't overlap, it is better to just add their amplitudes
-so that the amplitudes of the orginal waves is preserved.
+so that the amplitudes of the orginal waves are preserved.
 ```js
 // binary wave operator: add amplitudes
 function add(w1, w2) {
