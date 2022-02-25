@@ -15,7 +15,7 @@ const delta = 1e-10;
 (For precise methods
 of numerical differentiation, see [an earlier post](https://martin-henz.github.io/martin-henz/2022/02/13/abstraction-in-numerical-methods.html).)
 
-A simple example of a function in one argument is the  `square` function.
+An example of a scalar function with one parameter is the  `square` function.
 ```js
 const square = x => x * x;
 ```
@@ -40,7 +40,7 @@ we write `square'`, it is clear what argument we are
 differentiating for.
 
 The problem with Lagrange's notation is that it doesn't
-spell out which parameter we are differentiating for 
+spell out which parameter(s) we are differentiating for 
 when there are multiple parameters.
 
 For functions with multiple parameters, we would like
@@ -96,8 +96,8 @@ const add_to_named = (values, f, name, delta) =>
 Now we can apply Euler's function `D` to `"x"` and `f` and get
 the partial derivative of `f` with respect to parameter `"x"`.
 ```js
-D("x")(f);                  // returns Dx f
-display(D("x")(f)(1, 2));   // returns Dx f(1, 2), approximately 4
+D("x")(f);         // returns Dx f
+D("x")(f)(1, 2);   // returns Dx f(1, 2), approximately 4
 ```
 In the same way, we can use `D` to differentiate the square function.
 ```js
