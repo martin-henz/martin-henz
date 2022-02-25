@@ -112,7 +112,7 @@ can be defined using `D` as follows:
 ```js
 const Nabla = f => (...x) => f.argnames.map((name, i) => D(name)(f)(...x));
 ```
-For example, we can apply `Nabla` to `f`.
+For example, we can apply `Nabla` to the function `f` above as follows.
 ```js
 Nabla(f);          // the Nabla function of f
 
