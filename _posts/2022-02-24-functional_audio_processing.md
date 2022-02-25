@@ -251,9 +251,9 @@ play_wave(repeated_rhythm, 4);
 
 A common way of making music follows the so-called
 *equal temperament*. A sequence of 12 pitches (frequencies)
-are spaces equally between a pitch and the pitch that doubles
+are spaced equally between a pitch and the pitch that doubles
 its frequency. Traditionally the pitches are labelled
-with letters, possibly augmented by a *sharp* sign.
+with letters from `a` to `g`, possibly augmented by a *sharp* sign.
 ```js
 // ratio of two neighboring notes in equal temperament
 const semitone = math_pow(2, 1/12);
@@ -271,6 +271,10 @@ const f             = e        * semitone;
 const f_sharp       = f        * semitone;
 const g             = f_sharp  * semitone;
 const g_sharp       = g        * semitone;
+```
+The next so-called *octave* is distinguished with an underscore
+before each pitch name.
+```
 const _a            = g_sharp  * semitone;
 const _a_sharp      = _a       * semitone;
 const _b            = _a_sharp * semitone;
@@ -278,8 +282,10 @@ const _c            = _b       * semitone;
 const _c_sharp      = _c       * semitone;
 const _d            = _c_sharp * semitone;
 const _d_sharp      = _d       * semitone;
+// etc
 ```
-A pleasant sound is produced by combining a base frequency
+A pleasant sound, reminiscent of a pipe organ, is produced
+by combining a base frequency
 with its first and third overtone. The `organ` function
 below produces such a sound using a given base frequency
 and a given duration, the latter used to make an envelope.
