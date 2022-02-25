@@ -84,7 +84,7 @@ play_wave(boston_police, 2);
 Notice the function declaration, which is an alternative way
 in JavaScript to give a name to a function.
 
-## Wave Transformations
+## Wave Transformers
 
 You can achieve a simple fast-forward effect by "shrinking" time:
 multiplying the time factor with a given value `r` before applying
@@ -96,7 +96,7 @@ function fast_forward(r) {
 play_wave(boston_police, 2);
 play_wave(fast_forward(1.2)(boston_police), 2);
 ```
-Note that the function `fast_forward` returns a *wave transformation*,
+Note that the function `fast_forward` returns a *wave transformer*,
 which is a function that takes a wave as argument and returns a wave.
 It is interesting to note that white noise as implemented above
 is invariant under any `fast_forward` function.
@@ -104,9 +104,9 @@ is invariant under any `fast_forward` function.
 play_wave(noise, 2);
 play_wave(fast_forward(2)(noise), 2);
 ```
-The function `delay` returns a wave transformation
+The function `delay` returns a wave transformer
 that delays a given wave by a given number of seconds, and
-the function `cut` returns a wave transformation that cuts
+the function `cut` returns a wave transformer that cuts
 a given wave to be non-zero only in a given interval, also
 given in seconds.
 ```js
@@ -195,7 +195,7 @@ play_wave(repeat_every(2)(german_fire), 8);
 where a given wave waxes and wanes according to a specified
 pattern. The simple `AD` envelope (A for "attack", D for "decay")
 below returns a wave
-transformation that linearly increases the amplitude of a
+transformer that linearly increases the amplitude of a
 given wave until a time
 `t1`, then linearly decreases the amplitude until it
 reaches 0 at a time `t2`.
