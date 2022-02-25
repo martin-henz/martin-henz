@@ -1,16 +1,18 @@
 # Euler's Notation for Partial Derivatives
 
 In this short post, we express Euler's notation for partial derivatives
-of functions with multiple parameters using JavaScript. As usual, you find the
-JavaScript program by following the link.
+of scalar functions with multiple parameters using JavaScript. As usual, you find the
+JavaScript program by [following the link](https://share.sourceacademy.org/gsunu),
+but this time, you need to change the language from Source §4 to "full JavaScript".
 
 To illustrate the ideas, we present some simple numerical differentiation functions,
 and will not worry about the precision
-of the result here, so it's good to have a fixed "small" value, to use as "delta".
+of the result here, so it's good to have a fixed "small" but not too small value,
+to use as "delta".
 ```js
 const delta = 1e-10;
 ```
-(We choose this `delta` to be small, but not too small. For precise methods
+(For precise methods
 of numerical differentiation, see [an earlier post](https://martin-henz.github.io/martin-henz/2022/02/13/abstraction-in-numerical-methods.html).)
 
 A simple example of a function in one argument is the  `square` function.
@@ -19,7 +21,7 @@ const square = x => x * x;
 ```
 A simple numerical differentiation function 
 follows the definition of derivatives, using Lagrange's notation:
-`f'(x) = (f(x + d) - f(x)) / d`, where `d` approaches 0
+`f'(x) = (f(x + d) - f(x)) / d`, where `d` approaches 0. Using our fixed `delta`, we can write:
 ```js
 const differentiate = f => x => (f(x + delta) - f(x)) / delta;
 ```
@@ -42,7 +44,7 @@ spell out which parameter we are differentiating for
 when there are multiple parameters.
 
 For functions with multiple parameters, we would like
-to compute a partial derivative by changing one value
+to compute a *partial derivative* by changing one value
 and leave the other values unchanged.
 
 For example, we would like to compute the partial 
@@ -75,7 +77,8 @@ square.argnames = ["x"];
 We can define Euler's function D as a function
 that takes a named parameter "name" as argument and
 returns a differentiation function: A function
-that differentiates a function with repect to "name".
+that differentiates a given scalar function (whose parameters
+are named as described above) with repect to "name".
 ```js
 const D = name => f => (...x) => (f(...add_to_named(x, f, name, delta)) 
                                   - f(...x)) 
@@ -102,7 +105,7 @@ D("x")(square);    // returns approx Dx square: a function square'(x) = 2 * x
 D("x")(square)(1); // returns approximately square'(1) = 2
 ```
 The Nabla function (usually denoted by the symbol ∇) takes a
-multi-parameter function `f` as argument
+multi-parameter scalar function `f` as argument
 and returns a multi-parameter function that returns the gradient
 vector of `f` at the given position. In JavaScript, the Nabla function
 can be defined using `D` as follows:
@@ -112,7 +115,8 @@ const Nabla = f => (...x) => f.argnames.map((name, i) => D(name)(f)(...x));
 For example, we can apply `Nabla` to `f`.
 ```js
 Nabla(f);          // the Nabla function of f
-Nabla(f)(1, 2); // the gradient vector of f at position (1,2),
+
+Nabla(f)(1, 2);    // the gradient vector of f at position (1,2),
                    // approximatately [4, 5]
 ```
 
