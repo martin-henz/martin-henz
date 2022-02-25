@@ -5,10 +5,11 @@ tags: Random
 # Functional Audio Processing
 
 Functions are among the first things you will learn when you pick up JavaScript.
-Sounds are pressure waves traveling through the air, and a wave is function from
+Sounds are pressure waves traveling through the air, and a wave can be regarded
+as a function from
 time to the amplitude of the wave at that time. In this blog post, I'm exploring
 the use of sound to learn how JavaScript functions are used.
-[Click here]() to play.
+[Click here](https://share.sourceacademy.org/wave) to play.
 
 ## The first beeps
 
@@ -18,7 +19,7 @@ constant.
 const π = math_PI;
 ```
 Some functions are built into the language. For example, JavaScript knows the
-sine function as `Math.sin`. In the Source dialect this function is called
+sine function as `Math.sin`. In the Source dialect, this function is called
 `math_sin`. You can apply a function using the usual mathematical notation:
 ```js
 math_sin(1); // returns sin(1), about 0.84
@@ -32,8 +33,8 @@ represents the function that takes an argument `t` and returns the result
 of applying `math_sin` to `2 * π * t * 440`. That's our first sound wave:
 If `t` is the time measured in seconds, this function represents a sound
 wave with frequency 440 Hertz. That means the sound wave oscillates between
--1 and 1 440 times per second. The function `play_wave` makes the wave
-audible.
+-1 and 1 exactly 440 times per second. The function `play_wave` makes such
+waves audible.
 ```js
 play_wave(t => math_sin(2 * π * t * 440), 1);
 ```
@@ -42,14 +43,15 @@ seconds, here 1.
 
 Instead of fixing the frequency of the sound, we can write a function
 `sine_wave` that takes a frequency `f` as argument and returns a sound
-wave with that fequency.
+wave with that frequency.
 ```js
 const sine_wave = f => t => math_sin(2 * π * t * f);
 play_wave(sine_wave(880), 1);
 ```
 If you wonder how the `play_wave` function does its magic, you can
 apply `display` to the result of the wave function. For a sound with
-a duration of 100 microseconds, you see 10 values. That means that
+a duration of 100 microseconds, you may see around 10 values, depending
+on your browser. That means that
 `play_wave` samples the wave at a frequency of about 100 kilohertz
 in order to digitize the sound to make it audible on your computer.
 ```js
@@ -61,7 +63,7 @@ to each of your two speakers, using the function `play_waves`.
 ```js
 play_waves(sine_wave(440), sine_wave(660), 1);
 ```
-White noise can be produced by choosing a random value between -1 and
+*White noise* can be produced by choosing a random value between -1 and
 1 as amplitude, each time `play_wave` calls the wave function.
 ```js
 const noise = t => math_random() * 2 - 1;
@@ -69,7 +71,7 @@ play_wave(noise, 1);
 ```
 Here is a more interesting sound: A sine wave whose frequency
 changes, following a sine-wave pattern. This is done by adding a
-changing variable offset to the argument of the outer sine function.
+changing offset to the argument of the outer sine function.
 The result is a sound reminiscent of an American police siren.
 ```js
 function police(base_freq, mod_freq, mod_ind) {
@@ -82,6 +84,8 @@ play_wave(boston_police, 2);
 Notice the function declaration, which is an alternative way
 in JavaScript to give a name to a function.
 
+## Wave Transformations
+
 You can achieve a simple fast-forward effect by "shrinking" time:
 multiplying the time factor with a given value `r` before applying
 a given wave function to it.
@@ -92,7 +96,7 @@ function fast_forward(r) {
 play_wave(boston_police, 2);
 play_wave(fast_forward(1.2)(boston_police), 2);
 ```
-Note that the function `fast_forward` returns a wave transformation,
+Note that the function `fast_forward` returns a *wave transformation*,
 which is a function that takes a wave as argument and returns a wave.
 It is interesting to note that white noise as implemented above
 is invariant under any `fast_forward` function.
@@ -100,8 +104,6 @@ is invariant under any `fast_forward` function.
 play_wave(noise, 2);
 play_wave(fast_forward(2)(noise), 2);
 ```
-## Wave Transformations
-
 The function `delay` returns a wave transformation
 that delays a given wave by a given number of seconds, and
 the function `cut` returns a wave transformation that cuts
@@ -128,8 +130,9 @@ play_wave(cut(1, 1.2)(sine_wave(1000)), 3);
 
 ## Binary Operations on Waves
 
-Our first binary operation on waves averages their amplitudes
-and is used for combining two waves concurrently.
+Our first *binary operation* on waves averages their amplitudes
+and is used for combining two waves concurrently so that the
+applitude of the result remains between -1 and 1.
 ```js
 // binary wave operator: average amplitudes
 function average(w1, w2) {
@@ -154,7 +157,8 @@ const interference_2 = average(sine_wave(580), sine_wave(600));
 play_wave(interference_2, 1);
 ```
 If two waves are to be combined sequentially and if they
-don't overlap, it is better to just add their amplitudes.
+don't overlap, it is better to just add their amplitudes
+so that the amplitudes of the orginal waves is preserved.
 ```js
 // binary wave operator: add amplitudes
 function add(w1, w2) {
@@ -187,24 +191,22 @@ play_wave(repeat_every(2)(german_fire), 8);
 
 ## Wave Envelopes
 
-Envelopes are an important concept in sound processing
+*Envelopes* are an important concept in sound processing
 where a given wave waxes and wanes according to a specified
-pattern. The simple `sads` envelope below returns a wave
-transformation that silences the given wave until a time
-`t1`, then linearly increases the amplitude until a time
-`t2`, then linearly decreases the amplitude until it
-reaches 0 at a time `t3`.
+pattern. The simple `AD` envelope (A for "attack", D for "decay")
+below returns a wave
+transformation that linearly increases the amplitude of a
+given wave until a time
+`t1`, then linearly decreases the amplitude until it
+reaches 0 at a time `t2`.
 ```js
-function sads(t1, t2, t3) {
-    const a1 = 1 / (t2 - t1);
-    const b1 = - t1 / (t2 - t1);
-    const a2 = 1 / (t2 - t3);
-    const b2 = - t3 / (t2 - t3);
-    return w => t => t < t1 
-                     ? 0
+function AD(t1, t2) {
+    const a1 = 1 / t1;
+    const a2 = 1 / (t1 - t2);
+    const b2 = t2 / (t2 - t1);
+    return w => t => t > 0 && t < t1
+                     ? w(t) * a1 * t
                      : t < t2
-                     ? w(t) * (a1 * t + b1)
-                     : t < t3
                      ? w(t) * (a2 * t + b2)
                      : 0;
 }
@@ -212,7 +214,7 @@ function sads(t1, t2, t3) {
 We can turn white noise into an instrument by applying a drum
 envelope to it.
 ```js
-const drum = sads(0, 0.005, 0.1)(noise);
+const drum = AD(0, 0.005, 0.1)(noise);
 const snare_drum = drum(noise);
 play_wave(snare_drum, 1);
 ```
@@ -283,7 +285,7 @@ below produces such a sound using a given base frequency
 and a given duration, the latter used to make an envelope.
 ```js
 // organ has base frequency and two overtones at octaves
-const organ = f => d => sads(0, 0.1, d)
+const organ = f => d => AD(0.1, d)
                             (average(sine_wave(f),
                                  average(sine_wave(f * 2),
                                      sine_wave(f * 4))));
@@ -350,8 +352,8 @@ Finally we use different envelopes for the left and right
 channel, which means that the listener perceives the train
 approaching from the left and leaving to the right.
 ```js
-const left = sads(0, 2, 6);
-const right = sads(0, 4, 6);         
+const left = AD(2, 6);
+const right = AD(4, 6);         
 
 play_waves(left(doppler_amtrak), right(doppler_amtrak), 6);
 ```
