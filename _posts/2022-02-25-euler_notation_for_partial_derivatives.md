@@ -62,10 +62,10 @@ separately with respect to `x`, and with respect to `y`.
 
 Euler's notation uses the parameter name for this, 
 regardless of its position in the list of arguments:
-`(Dx f)(x, y) = (f(x + delta, y) - f(x, y)) / delta`
+`(Dx f)(x, y) = (f(x + d, y) - f(x, y)) / d` where `d` approaches 0
 
 and
-`(Dy f)(x, y) = (f(x, y + delta) - f(x, y)) / delta`
+`(Dy f)(x, y) = (f(x, y + d) - f(x, y)) / d` where `d` approaches 0
 
 ## Getting Function Parameters in JavaScript
 
@@ -105,11 +105,11 @@ If you write the function `f(x, y) = x² + x y + y²` as
 ```js
 const f = (x, y) => square(x) + x * y + square(y);
 ```
-you can access its parameters by
+and access its parameters with
 ```js
 parameters(f);   // returns the vector ["x", "y"]
 ```
-Similarly, your retrieve the parameters of `square` by
+Similarly, you can retrieve the parameters of `square` with
 ```js
 parameters(square); // returns the vector ["x"]
 ```
