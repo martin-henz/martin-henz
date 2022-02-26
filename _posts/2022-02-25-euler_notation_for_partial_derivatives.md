@@ -115,8 +115,7 @@ parameters(square); // returns the vector ["x"]
 Now, I define Euler's D notation as a function `D`
 that takes a named parameter "name" as argument and
 returns a function transformer: A function
-that differentiates a given scalar function (whose parameters
-are named as described above) with repect to "name".
+that differentiates a given scalar function with repect to "name".
 ```js
 const D = name => f => (...x) => (f(...add_to_named(x, f, name, delta)) 
                                   - f(...x)) 
