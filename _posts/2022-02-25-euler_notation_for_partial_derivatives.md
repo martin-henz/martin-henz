@@ -97,7 +97,7 @@ function parameters(f) {
     return params;
 }
 ```
-If you write the function *`f(x, y) = x² + x y + y²` as
+If you write the function `f(x, y) = x² + x y + y²` as
 ```js
 const f = (x, y) => square(x) + x * y + square(y);
 ```
@@ -112,8 +112,8 @@ parameters(square); // returns the vector ["x"]
 
 ## Euler's Notation for Partial Derivatives
 
-Now, I define Euler's D notation as a function `D`
-that takes a named parameter "name" as argument and
+Now, you can define Euler's D notation as a function `D`
+that takes a parameter "name" as argument and
 returns a function transformer: A function
 that differentiates a given scalar function with repect to "name".
 ```js
@@ -132,13 +132,13 @@ const add_to_named = (values, f, name, delta) => {
                                                      : x);
                      };
 ```
-Now we can apply Euler's function `D` to `"x"` and `f` and get
+Now you can apply Euler's function `D` to `"x"` and `f` and get
 the partial derivative of `f` with respect to parameter `"x"`.
 ```js
 D("x")(f);         // returns Dx f
 D("x")(f)(1, 2);   // returns Dx f(1, 2), approximately 4
 ```
-In the same way, we can use `D` to differentiate the square function.
+In the same way, you can use `D` to differentiate the square function.
 ```js
 D("x")(square);    // returns approx Dx square: a function square'(x) = 2 * x
 D("x")(square)(1); // returns approximately square'(1) = 2
@@ -154,7 +154,7 @@ can be defined using `D` as follows:
 ```js
 const Nabla = f => (...x) => parameters(f).map((name, i) => D(name)(f)(...x));
 ```
-For example, we can apply `Nabla` to the function `f` above as follows.
+For example, you can apply `Nabla` to the function `f` above as follows.
 ```js
 Nabla(f);          // the Nabla function of f
 
