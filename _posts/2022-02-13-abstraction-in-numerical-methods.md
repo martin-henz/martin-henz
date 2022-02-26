@@ -1,5 +1,5 @@
 ---
-tags: MIT_AI_Memo
+tags: MIT-AI-Memo
 ---
 
 # Abstraction in Numerical Methods

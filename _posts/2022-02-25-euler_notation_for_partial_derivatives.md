@@ -1,8 +1,12 @@
+---
+tags: SICM SDF
+---
+
 # Euler's Notation for Partial Derivatives
 
 In this short post, I express Euler's notation for partial derivatives
 of scalar functions with multiple parameters using JavaScript. As usual, you find the
-JavaScript program by [following the link](https://share.sourceacademy.org/eulernotation),
+JavaScript program by [following the Source Academy link](https://share.sourceacademy.org/eulernotation),
 but this time, you need to change the language from Source §4 to "full JavaScript".
 
 ## The Single-parameter Case
