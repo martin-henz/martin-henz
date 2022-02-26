@@ -117,9 +117,9 @@ parameters(square); // returns the vector ["x"]
 ## Euler's Notation for Partial Derivatives
 
 Now, you can define Euler's D notation as a function `D`
-that takes a parameter "name" as argument and
+that takes a parameter `name` as argument and
 returns a function transformer: A function
-that differentiates a given scalar function with repect to "name".
+that differentiates a given scalar function with repect to `name`.
 ```js
 const D = name => f => (...x) => (f(...add_to_named(x, f, name, delta)) 
                                   - f(...x)) 
@@ -137,20 +137,26 @@ const add_to_named = (values, f, name, delta) => {
                      };
 ```
 Now you can apply Euler's function `D` to `"x"` and `f` and get
-the partial derivative of `f` with respect to parameter `"x"`.
+the partial derivative of `f` with respect to parameter `x`
 ```js
 D("x")(f);         // returns Dx f
 D("x")(f)(1, 2);   // returns Dx f(1, 2), approximately 4
 ```
+or with respect to parameter `y`
+```js
+D("y")(f);         // returns Dy f
+D("y")(f)(1, 2);   // returns Dy f(1, 2), approximately 5
+```
 In the same way, you can use `D` to differentiate the square function.
 ```js
-D("x")(square);    // returns approx Dx square: a function square'(x) = 2 * x
+D("x")(square);    // returns approximately Dx square: square'(x) = 2 * x
 D("x")(square)(1); // returns approximately square'(1) = 2
 ```
 
 ## The Nabla Function
 
-The Nabla function (usually denoted by the symbol ∇) takes a
+The Nabla function (usually denoted by the symbol ∇) is a function
+transformer that takes a
 multi-parameter scalar function `f` as argument
 and returns a multi-parameter function that returns the gradient
 vector of `f` at the given position. In JavaScript, the Nabla function
