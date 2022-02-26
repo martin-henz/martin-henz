@@ -1,11 +1,13 @@
 # Euler's Notation for Partial Derivatives
 
-In this short post, we express Euler's notation for partial derivatives
+In this short post, I express Euler's notation for partial derivatives
 of scalar functions with multiple parameters using JavaScript. As usual, you find the
-JavaScript program by [following the link](https://share.sourceacademy.org/gsunu),
+JavaScript program by [following the link](https://share.sourceacademy.org/eulernotation),
 but this time, you need to change the language from Source §4 to "full JavaScript".
 
-To illustrate the ideas, we present some simple numerical differentiation functions,
+## The Single-parameter Case
+
+To illustrate the ideas, I present some simple numerical differentiation functions,
 and will not worry about the precision
 of the result here, so it's good to have a fixed "small" but not too small value,
 to use as "delta".
@@ -21,11 +23,11 @@ const square = x => x * x;
 ```
 A simple numerical differentiation function 
 follows the definition of derivatives, using Lagrange's notation:
-`f'(x) = (f(x + d) - f(x)) / d`, where `d` approaches 0. Using our fixed `delta`, we can write:
+`f'(x) = (f(x + d) - f(x)) / d`, where `d` approaches 0. Using our fixed `delta`, you can write:
 ```js
 const differentiate = f => x => (f(x + delta) - f(x)) / delta;
 ```
-Using this `differentiate` function, we can differentiate `square` as follows.
+Using this `differentiate` function, you can differentiate `square` as follows.
 ```
 differentiate(square);    // returns a function square'
                           // approximately square'(x) = 2 * x
@@ -36,18 +38,20 @@ gives approximately 2.
 differentiate(square)(1);
 ```
 The square function above only has one argument, so when
-we write `square'`, it is clear what argument we are 
+you write `square'`, it is clear what argument you are 
 differentiating for.
 
+## Multiple Parameters
+
 The problem with Lagrange's notation is that it doesn't
-spell out which parameter(s) we are differentiating for 
+spell out which parameter(s) you are differentiating for 
 when there are multiple parameters.
 
-For functions with multiple parameters, we would like
+For functions with multiple parameters, you would like
 to compute a *partial derivative* by changing one value
 and leave the other values unchanged.
 
-For example, we would like to compute the partial 
+For example, you would like to compute the partial 
 derivative of
 `f(x, y) = x² + x y + y²`
 separately with respect to `x`, and with respect to `y`.
@@ -58,25 +62,59 @@ regardless of its position in the list of arguments:
 
 and
 `(Dy f)(x, y) = (f(x, y + delta) - f(x, y)) / delta`
-    
-To achieve this in JavaScript, we need to associate the
-names of the parameters with each function. The simplest
-method is to treat the function as an object and add
-a property `argnames` to the function after declarating it.
+
+## Getting Function Parameters in JavaScript
+
+To achieve this in JavaScript, you need to associate the
+names of the parameters with each function. There isn't
+any simple way to do this in JavaScript. See
+[here for an approach I adopted and improved a bit](https://www.geeksforgeeks.org/how-to-get-the-javascript-function-parameter-names-values-dynamically/).
+```js
+function parameters(f) {
+    // string representation of the function
+    let str = f.toString();
+    // remove comments of the form /* ... */
+    // remove comments of the form //
+    // remove '{...' if f is function declaration
+    // removing '=>...' if f is arrow function
+    str = str.replace(/\/\*[\s\S]*?\*\//g, '')
+             .replace(/\/\/(.)*/g, '')
+             .replace(/{[\s\S]*/, '')
+             .replace(/=>[\s\S]*/g, '')
+             .trim();
+    // start parameter names after first '('
+    const start = str.indexOf("(") + 1;
+    // end parameter names is just before last ')' if there is one
+    const end = str.indexOf(")") === -1 ? str.length : str.length - 1;
+    const result = str.substring(start, end).split(", ");
+    const params = [];
+    result.forEach(element => {
+        // remove any default value
+        element = element.replace(/=[\s\S]*/g, '').trim();
+        if(element.length > 0)
+            params.push(element);
+    });
+    return params;
+}
+```
+If you write the function *`f(x, y) = x² + x y + y²` as
 ```js
 const f = (x, y) => square(x) + x * y + square(y);
-f.argnames = ["x", "y"]; 
 ```
-With this, we know that the first parameter of `f`
-has the name `"x"` and the second parameter has
-the name `"y"`. We do the same for the square function
-above.
+you can access its parameters by
 ```js
-square.argnames = ["x"];
+parameters(f);   // returns the vector ["x", "y"]
 ```
-We can define Euler's function D as a function
+Similarly, your retrieve the parameters of `square` by
+```js
+parameters(square); // returns the vector ["x"]
+```
+
+## Euler's Notation for Partial Derivatives
+
+Now, I define Euler's D notation as a function `D`
 that takes a named parameter "name" as argument and
-returns a differentiation function: A function
+returns a function transformer: A function
 that differentiates a given scalar function (whose parameters
 are named as described above) with repect to "name".
 ```js
@@ -88,10 +126,12 @@ The helper function `add_to_named` adds a given `delta` to the value in
 `values` that is named by `name`, according to the
 parameter names of `f`:
 ```js
-const add_to_named = (values, f, name, delta) =>
-                                 values.map((x, i) => f.argnames[i] === name
-                                 ? x + delta
-                                 : x);
+const add_to_named = (values, f, name, delta) => {
+                         const params = parameters(f);
+                         return values.map((x, i) => params[i] === name
+                                                     ? x + delta
+                                                     : x);
+                     };
 ```
 Now we can apply Euler's function `D` to `"x"` and `f` and get
 the partial derivative of `f` with respect to parameter `"x"`.
@@ -104,13 +144,16 @@ In the same way, we can use `D` to differentiate the square function.
 D("x")(square);    // returns approx Dx square: a function square'(x) = 2 * x
 D("x")(square)(1); // returns approximately square'(1) = 2
 ```
+
+## The Nabla Function
+
 The Nabla function (usually denoted by the symbol ∇) takes a
 multi-parameter scalar function `f` as argument
 and returns a multi-parameter function that returns the gradient
 vector of `f` at the given position. In JavaScript, the Nabla function
 can be defined using `D` as follows:
 ```js
-const Nabla = f => (...x) => f.argnames.map((name, i) => D(name)(f)(...x));
+const Nabla = f => (...x) => parameters(f).map((name, i) => D(name)(f)(...x));
 ```
 For example, we can apply `Nabla` to the function `f` above as follows.
 ```js
