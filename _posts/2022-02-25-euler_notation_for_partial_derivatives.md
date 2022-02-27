@@ -6,7 +6,7 @@ tags: SICM SDF
 
 In this short post, I express the SCMUTILS notation for partial derivatives
 of scalar functions with multiple parameters using JavaScript. As usual, you find the
-JavaScript program by [following the Source Academy link](https://share.sourceacademy.org/partialderiv),
+JavaScript program by [following the Source Academy link](https://share.sourceacademy.org/eab8p),
 but this time, you need to change the language from Source §4 to "full JavaScript".
 
 ## The Single-parameter Case
