@@ -29,7 +29,7 @@ of numerical differentiation, see
 [an earlier post](https://martin-henz.github.io/martin-henz/2022/02/13/abstraction-in-numerical-methods.html). To explore the notation for differentiation, I ignore these
 issues and stick to the naive version with a relatively large `delta`.
 ```js
-const delta = 1e-5;
+const delta = 1e-4;
 ```
 Using this `differentiate` function, you can differentiate `square` as follows.
 ```
@@ -93,7 +93,7 @@ the `i`th component of the vector `values`.
 const add_to_index = 
     (values, i, delta) => values.map((x, j) => i === j ? x + delta : x);
 ```
-Now you can apply `partial` to 0 and `f` and get
+You can apply `partial_single` to 0 and `f` and get
 the partial derivative of `f` with respect to the first parameter `x`
 ```js
 partial_single(0)(f);         // returns Dx f
@@ -104,7 +104,7 @@ or with respect to parameter `y`
 partial_single(1)(f);         // returns Dy f
 partial_single(1)(f)(1, 2);   // returns Dy f(1, 2), approximately 5
 ```
-In the same way, you can use `partial_single` to differentiate the square function.
+You can use `partial_single` to differentiate the square function.
 ```js
 partial_single(0)(square);    // returns approximately Dx square: square'(x) = 2 * x
 partial_single(0)(square)(1); // returns approximately square'(1) = 2
@@ -141,9 +141,15 @@ transformer that takes a
 multi-parameter scalar function `f` as argument
 and returns a multi-parameter function that returns the gradient
 vector of `f` at the given position. In JavaScript, the Nabla function
-can be defined using `D` as follows:
+can be defined using `partial_single` as follows:
 ```js
-const Nabla = f => (...x) => parameters(f).map((name, i) => D(name)(f)(...x));
+const Nabla = f => {
+    // indices is vector [0, 1,...,n] where n is arity of f
+    const indices = Array(f.length).fill().map( (ignore, i) => i);
+    // partials is vector [Dx f, Dy f,...] if f has parameters x, y, ...
+    const partials = indices.map(i => partial_single(i)(f));
+    return (...x) => partials.map(p => p(...x));
+};
 ```
 For example, you can apply `Nabla` to the function `f` above as follows.
 ```js
