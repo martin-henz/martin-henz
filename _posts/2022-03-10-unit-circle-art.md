@@ -87,7 +87,7 @@ colored unit circle with straight lines, and turn this into an "art form".
 
 ## Connecting Points on the Unit Circle
 
-The following abstraction `connect_points` comes on handy.
+The following abstraction `connect_points` comes in handy.
 It takes a number `n` and a function `f` as arguments and connects
 `n` points with each other. The points result from applying
 the colored unit circle to values 
@@ -172,8 +172,8 @@ connect_points(84, k => k * k * k * k * k * k * k);
 ## Connecting Lines
 
 Another way of connecting points on the unit circle using 
-a function f is to draw a line from i to f(i), for each i
-from 0 to n. That can be accomplished using the `connect_points`
+a function `f` is to draw a line from `i` to `f(i)`, for each `i`
+from 0 to `n`. That can be accomplished using the `connect_points`
 abstraction, by connecting (1) the point at i with (2) the 
 point at f(i), then (3) going back to i, which explains the
 occurrences of the number 3 in the program.
@@ -199,7 +199,7 @@ connect_lines(150, k => 25);
 <img src="/martin-henz/images/unit_circle_art/cl_150_25.png" alt="connect lines 150 offset 25" width="400"/>
 
 Connecting the points with a point that results from applying
-the modulo operator % yields intriguing patterns.
+the modulo operator % yields intriguing interference patterns.
 ```js
 connect_lines(150, k => k % 3); 
 ```
@@ -255,14 +255,14 @@ draw_times_table(200, 4);      // m = 4: 3 lobes...
 <img src="/martin-henz/images/unit_circle_art/tt_200_4.png" alt="times table modulo 200 times 4" width="400"/>
 
 Specific relationships between `n` and `m` create interesting
-visual patterns. For n = 397 and m = 200, you get a variant
+visual patterns. For `n = 397` and `m = 200`, you get a variant
 of the cardiod...
 ```js
 draw_times_table(397, 200);    // m = (n + 3) / 2: cardioid
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_397_200.png" alt="times table modulo 397 times 200" width="400"/>
 
-...and for n = 500 and m = 252, you get a variant of the
+...and for `n = 500` and `m = 252`, you get a variant of the
 nephroid.
 ```js
 draw_times_table(500, 252);    // m = (n + 4) / 2: nephroid
@@ -270,7 +270,7 @@ draw_times_table(500, 252);    // m = (n + 4) / 2: nephroid
 <img src="/martin-henz/images/unit_circle_art/tt_500_252.png" alt="times table modulo 500 times 252" width="400"/>
 
 If you play with the numbers, you observe what relationship
-between n and m gives rise to what kind of picture. Enjoy!
+between `n` and `m` gives rise to what kind of picture. Enjoy!
 ```js
 draw_times_table(501, 253);    // m = (n + 5) / 2: 3 lobes...
 ```
