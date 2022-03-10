@@ -74,7 +74,7 @@ other functions, and then the parameter names may not be obvious.
 
 ## Scmutils Notation for Partial Derivatives
 
-Scmutils solves the issue by defining a function partial
+Scmutils solves the issue by defining a function `partial`
 that takes a subset of the parameter *indices* (rather than names)
 of the function
 to be differentiated, and returns a function transformer:
