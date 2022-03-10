@@ -41,7 +41,7 @@ and the resulting points are connected.
 ```js
 draw_connected_full_view(4)(diagonal);
 ```
-<img src="/martin-henz/images/unit_circle_art/green_diagonal.png" alt="green circle" width="200"/>
+<img src="/martin-henz/images/unit_circle_art/green_diagonal.png" alt="green diagonal" width="400"/>
 
 ## The Unit Circle
 
@@ -55,6 +55,7 @@ const unit_circle = t => make_color_point(
     255, 0, 0);                                              // rgb
 draw_connected_full_view(100)(unit_circle);
 ```
+<img src="/martin-henz/images/unit_circle_art/red_unit_circle.png" alt="red circle" width="400"/>
 This circle is called the "unit circle" because it results from
 drawing a circle of radius 1 whose center has coordinate (0,0).
 
@@ -69,6 +70,7 @@ const colored_unit_circle = t => make_color_point(
     math_pow(math_cos(    π * t), 2) * 255);                   // b
 draw_connected_full_view(100)(colored_unit_circle);
 ```
+<img src="/martin-henz/images/unit_circle_art/colored_unit_circle.png" alt="colored circle" width="400"/>
 In this post, I constrain myself to connecting points on this
 colored unit circle with straight lines, and turn this into an "art form".
 
@@ -92,7 +94,8 @@ get a regular polygon with n vertices:
 connect_points(5, k => k);
 ```
 connecting the points
-// 0 / n, 1 / n, 2 / n, ..., n / n
+0 / n, 1 / n, 2 / n, ..., n / n
+<img src="/martin-henz/images/unit_circle_art/cp_5_1.png" alt="pentagon" width="400"/>
 
 The unit circle wraps around, if you apply it to values
 greater than 1, so you can obtain star shapes by connecting
@@ -100,8 +103,10 @@ multiples of the given value.
 ```js
 connect_points(5, k => k * 2);
 ```
-yields a pentagram because you connect the points
-// 0 / 5, 2 / 5, 4 / 5, 6 / 5, 8 / 5, and 10 / 5
+yields a pentagram
+<img src="/martin-henz/images/unit_circle_art/cp_5_2.png" alt="pentagram" width="400"/>
+because you connect the points
+0 / 5, 2 / 5, 4 / 5, 6 / 5, 8 / 5, and 10 / 5
 
 In the same way, you can create a star shape by connecting
 the corners of a 50-vertex polygon with each other such
@@ -110,39 +115,42 @@ further, in counterclockwise direction:
 ```js
 connect_points(50, k => k * 21);  
 ```
+<img src="/martin-henz/images/unit_circle_art/cp_50_21.png" alt="50-vertex star" width="400"/>
 Choosing random values on the circle also leads to
 an intriguing pattern, when you choose n large enough:
 ```js
 connect_points(1000, k => 1000 * math_random());
 ```
+<img src="/martin-henz/images/unit_circle_art/cp_1000_random.png" alt="random" width="400"/>
 
 ## Equation Signatures
 
 Every equation seems to have a particular "signature"
 image in this art form. Here are some examples.
 ```js
-connect_points(6561, k => k * k ); // wonderful
+connect_points(6561, k => k * k );
 ```
-
+<img src="/martin-henz/images/unit_circle_art/cp_6561_2.png" alt="random" width="400"/>
 ```js
-connect_points(1024, k => k * k * k + 3 * k * k + 3 * k + 1); // very nice
+connect_points(1024, k => k * k * k + 3 * k * k + 3 * k + 1);
 ```
-
+<img src="/martin-henz/images/unit_circle_art/cp_1024_1_3_3_1.png" alt="random" width="400"/>
 ```js
-connect_points(256, k => k * k * k * k); // like the best
+connect_points(256, k => k * k * k * k);
 ```
-
+<img src="/martin-henz/images/unit_circle_art/cp_256_4.png" alt="random" width="400"/>
 ```js
-connect_points(512, k => k * k * k * k); // more interesting
+connect_points(512, k => k * k * k * k);
 ```
-
+<img src="/martin-henz/images/unit_circle_art/cp_512_4.png" alt="random" width="400"/>
 ```js
-connect_points(512, k => k * k * k * k * k); // nice too
+connect_points(512, k => k * k * k * k * k); 
 ```
-
+<img src="/martin-henz/images/unit_circle_art/cp_512_5.png" alt="random" width="400"/>
 ```js
-connect_points(84, k => k * k * k * k * k * k * k); // nice
+connect_points(84, k => k * k * k * k * k * k * k);
 ```
+<img src="/martin-henz/images/unit_circle_art/cp_84_7.png" alt="random" width="400"/>
 
 ## Connecting Lines
 
@@ -160,42 +168,43 @@ const connect_lines =
                           return k % 3 === 1 ? g(v) * 3 : v * 3; }
                   );
 ```
-The star-shape above can now be achieved with addition.
-```js
-connect_lines(50, k => k + 21);
-```
 Connecting the every point with point 0 yields a picture like this.
 ```js
-connect_lines(250, k => 0); // kelly says fantastic
+connect_lines(150, k => 0);
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_150_0.png" alt="random" width="400"/>
 which you can turn in counterclockwise direction
 by using a non-zero destination point, here point 25.
 ```js
-connect_lines(250, k => 25);
+connect_lines(150, k => 25);
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_150_25.png" alt="random" width="400"/>
 Connecting the points with a point that results from applying
 the modulo operator % yields intriguing patterns.
 ```js
-connect_lines(151, k => k % 3); 
+connect_lines(150, k => k % 3); 
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_150_3.png" alt="random" width="400"/>
 ```js
-//connect_lines(151, k => k % 11);
+connect_lines(150, k => k % 11);
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_150_11.png" alt="random" width="400"/>
 ```js
 connect_lines(300, k => k % 11); 
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_300_11.png" alt="random" width="400"/>
 ```js
 connect_lines(250, k => k % 11+160);
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_250_11_160.png" alt="random" width="400"/>
 ```js
 connect_lines(250, k => k % 10 + k / 10);
 ```
-```js
-connect_lines(250, k => k % 11 + k / 2.5);
-```
+<img src="/martin-henz/images/unit_circle_art/cl_250_10_10.png" alt="random" width="400"/>
 ```js
 connect_lines(1000, k => k % 25 * 7); 
 ```
+<img src="/martin-henz/images/unit_circle_art/cl_1000_25_7.png" alt="random" width="400"/>
 
 ## Drawing Times Tables
 
@@ -209,54 +218,68 @@ const draw_times_table =
 ```
 The times table for 2 is called the cardiod.
 ```js
-draw_times_table(50,  2);      // m = 2: cardioid: 1 lobe
+draw_times_table(200,  2);      // m = 2: cardioid: 1 lobe
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_200_2.png" alt="random" width="400"/>
 The times table for 3 is called the nephroid.
 ```js
-draw_times_table(100, 3);      // m = 3: nephroid: 2 lobes
+draw_times_table(200, 3);      // m = 3: nephroid: 2 lobes
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_200_3.png" alt="random" width="400"/>
 The number of "lobes" of the picture increases with `m`: For
 `m = 4` you get 3 lobes, etc.
 ```js
-draw_times_table(100, 4);      // m = 4: 3 lobes...
+draw_times_table(200, 4);      // m = 4: 3 lobes...
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_200_4.png" alt="random" width="400"/>
 Specify relationships between `n` and `m` create interesting
 visual patterns. For n = 397 and m = 200, you get a variant
 of the cardiod...
 ```js
 draw_times_table(397, 200);    // m = (n + 3) / 2: cardioid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_397_200.png" alt="random" width="400"/>
 ...and for n = 500 and m = 252, you get a variant of the
 nephroid.
 ```js
 draw_times_table(500, 252);    // m = (n + 4) / 2: nephroid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_500_252.png" alt="random" width="400"/>
 If you play with the numbers, you observe what relationship
 between n and m gives rise to what kind of picture. Enjoy!
 ```js
 draw_times_table(501, 253);    // m = (n + 5) / 2: 3 lobes...
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_501_253.png" alt="random" width="400"/>
 ```js
 draw_times_table(500, 168);    // m = (n + 4) / 3: cardioid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_500_168.png" alt="random" width="400"/>
 ```js
 draw_times_table(295, 100);    // m = (n + 5) / 3: nephroid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_295_100.png" alt="random" width="400"/>
 ```js
 draw_times_table(594, 200);    // m = (n + 6) / 3: 3 lobes...
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_594_200.png" alt="random" width="400"/>
 ```js
 draw_times_table(395, 100);    // m = (n + 5) / 4: cardioid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_395_100.png" alt="random" width="400"/>
 ```js
 draw_times_table(494, 100);    // m = (n + 6) / 5: cardioid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_494_100.png" alt="random" width="400"/>
 ```js
 draw_times_table(593, 100);    // m = (n + 7) / 6: cardioid
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_593_100.png" alt="random" width="400"/>
 ```js
 draw_times_table(400, 201);    // m = n / 2 + 1 (/4,/8,/16)
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_400_201.png" alt="random" width="400"/>
 ```js
 draw_times_table(400, 199);    // m = (n / 2) - 1: square
 ```
+<img src="/martin-henz/images/unit_circle_art/tt_400_199.png" alt="random" width="400"/>
