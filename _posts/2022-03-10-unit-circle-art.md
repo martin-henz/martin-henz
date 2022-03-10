@@ -4,10 +4,12 @@ tags: Random
 
 # Unit Circle Art
 
+>
 > But out of limitations comes creativity.
 
 Debbie Allen 
 
+>
 > The enemy of art is the absence of limitations.
 
 Orson Welles
@@ -17,16 +19,23 @@ Orson Welles
 The art form I develop in this post involves colored 
 *curves* in two dimensions. Such a curve can be represented by a 
 function from a number range, here [0, 1], to a set of 
-colored *points*, where a Point has an x and y coordinate, and 
+colored *points*, where a point has an x and y coordinate, and 
 "rgb" (red-green-blue) values to represent its color.
 
 For example, the following function `diagonal` represents a 
-diagonal line.
+diagonal line
 ```js
 const diagonal = t => make_color_point(t, t, 0, 255, 0);
 ```
+because it maps each value `t` to a point `(t,t)`, which means
+that x and y coordinates increase from the lower left to the
+upper right.
 The line is green because the "red" value is 0, the "green" value
 is 255 (the maximum rgb value), and the "blue" value is 0.
+The programs in this post are
+[available here](https://share.sourceacademy.org/unitcircleart);
+to see the images, uncomment the lines that start with
+`//draw_connected_full_view`.
 
 You can visualize curves with the function `draw_connected_full_view`,
 which takes a number `n` as argument and returns a function that
@@ -56,6 +65,7 @@ const unit_circle = t => make_color_point(
 draw_connected_full_view(100)(unit_circle);
 ```
 <img src="/martin-henz/images/unit_circle_art/red_unit_circle.png" alt="red circle" width="400"/>
+
 This circle is called the "unit circle" because it results from
 drawing a circle of radius 1 whose center has coordinate (0,0).
 
@@ -71,30 +81,32 @@ const colored_unit_circle = t => make_color_point(
 draw_connected_full_view(100)(colored_unit_circle);
 ```
 <img src="/martin-henz/images/unit_circle_art/colored_unit_circle.png" alt="colored circle" width="400"/>
+
 In this post, I constrain myself to connecting points on this
 colored unit circle with straight lines, and turn this into an "art form".
 
 ## Connecting Points on the Unit Circle
 
 The following abstraction `connect_points` comes on handy.
-It takes a number n and a function f as arguments and connects
-n points with each other. The points result from applying
+It takes a number `n` and a function `f` as arguments and connects
+`n` points with each other. The points result from applying
 the colored unit circle to values 
-f(0) / n, f(1) / n, ..., f(n) / n
+`f(0) / n`, `f(1) / n`, ..., `f(n) / n`
 ```js
 const connect_points =
     (n, f) =>
         draw_connected_full_view(n)
         (t => colored_unit_circle(f(math_round(t * n)) / n));
 ```
-In the case where f is the identity function, you just 
-connect n points on the unit circle with each other, and
-get a regular polygon with n vertices:
+In the case where `f` is the identity function, you just 
+connect `n` points on the unit circle with each other, and
+get a regular polygon with `n` vertices:
 ```js
 connect_points(5, k => k);
 ```
 connecting the points
-0 / n, 1 / n, 2 / n, ..., n / n
+`0 / n`, `1 / n`, `2 / n`, ..., `n / n`
+
 <img src="/martin-henz/images/unit_circle_art/cp_5_1.png" alt="pentagon" width="400"/>
 
 The unit circle wraps around, if you apply it to values
@@ -104,9 +116,11 @@ multiples of the given value.
 connect_points(5, k => k * 2);
 ```
 yields a pentagram
+
 <img src="/martin-henz/images/unit_circle_art/cp_5_2.png" alt="pentagram" width="400"/>
+
 because you connect the points
-0 / 5, 2 / 5, 4 / 5, 6 / 5, 8 / 5, and 10 / 5
+`0 / 5`, `2 / 5`, `4 / 5`, `6 / 5`, `8 / 5`, and `10 / 5`.
 
 In the same way, you can create a star shape by connecting
 the corners of a 50-vertex polygon with each other such
@@ -115,12 +129,15 @@ further, in counterclockwise direction:
 ```js
 connect_points(50, k => k * 21);  
 ```
+
 <img src="/martin-henz/images/unit_circle_art/cp_50_21.png" alt="50-vertex star" width="400"/>
+
 Choosing random values on the circle also leads to
 an intriguing pattern, when you choose n large enough:
 ```js
 connect_points(1000, k => 1000 * math_random());
 ```
+
 <img src="/martin-henz/images/unit_circle_art/cp_1000_random.png" alt="random" width="400"/>
 
 ## Equation Signatures
@@ -173,12 +190,14 @@ Connecting the every point with point 0 yields a picture like this.
 connect_lines(150, k => 0);
 ```
 <img src="/martin-henz/images/unit_circle_art/cl_150_0.png" alt="random" width="400"/>
+
 which you can turn in counterclockwise direction
 by using a non-zero destination point, here point 25.
 ```js
 connect_lines(150, k => 25);
 ```
 <img src="/martin-henz/images/unit_circle_art/cl_150_25.png" alt="random" width="400"/>
+
 Connecting the points with a point that results from applying
 the modulo operator % yields intriguing patterns.
 ```js
@@ -216,35 +235,40 @@ You can achieve times tables with the simple abstraction `draw_times_table`:
 const draw_times_table =
     (n, m) => connect_lines(n, k => k * m);
 ```
-The times table for 2 is called the cardiod.
+The times table for 2 is called the *cardiod*.
 ```js
 draw_times_table(200,  2);      // m = 2: cardioid: 1 lobe
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_200_2.png" alt="random" width="400"/>
-The times table for 3 is called the nephroid.
+
+The times table for 3 is called the *nephroid*.
 ```js
 draw_times_table(200, 3);      // m = 3: nephroid: 2 lobes
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_200_3.png" alt="random" width="400"/>
+
 The number of "lobes" of the picture increases with `m`: For
 `m = 4` you get 3 lobes, etc.
 ```js
 draw_times_table(200, 4);      // m = 4: 3 lobes...
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_200_4.png" alt="random" width="400"/>
-Specify relationships between `n` and `m` create interesting
+
+Specific relationships between `n` and `m` create interesting
 visual patterns. For n = 397 and m = 200, you get a variant
 of the cardiod...
 ```js
 draw_times_table(397, 200);    // m = (n + 3) / 2: cardioid
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_397_200.png" alt="random" width="400"/>
+
 ...and for n = 500 and m = 252, you get a variant of the
 nephroid.
 ```js
 draw_times_table(500, 252);    // m = (n + 4) / 2: nephroid
 ```
 <img src="/martin-henz/images/unit_circle_art/tt_500_252.png" alt="random" width="400"/>
+
 If you play with the numbers, you observe what relationship
 between n and m gives rise to what kind of picture. Enjoy!
 ```js
