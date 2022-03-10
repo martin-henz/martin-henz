@@ -41,7 +41,7 @@ and the resulting points are connected.
 ```js
 draw_connected_full_view(4)(diagonal);
 ```
-<img src="/images/unit_circle_art/green_diagonal.png" alt="green circle" width="200"/>
+<img src="images/unit_circle_art/green_diagonal.png" alt="green circle" width="200"/>
 
 ## The Unit Circle
 
