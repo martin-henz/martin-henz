@@ -198,7 +198,6 @@ blocks and occurrences of names in their scope,
 and support functions) adds the functions `eval_block` and `eval_declaration`.
 ``` js
 function evaluate(comp, env) { 
-//    display_list(comp);
     return is_literal(comp)
            ? literal_value(comp)
 	   ...
@@ -370,7 +369,6 @@ caller, ignoring the subsequent statements `44;` and `66;` that would otherwise
 remain to be evaluated in the body. To achieve this, the `evaluate` function 
 ``` js
 function evaluate(component, env) {
-//    display_list(component);
     return is_literal(component)
            ? literal_value(component)
            ...
