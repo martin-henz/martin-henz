@@ -39,7 +39,9 @@ list("binary_operator_combination",
      list("binary_operator_combination",
           "+",
           list("literal", 1),
-          list("binary_operator_combination", "*", list("literal", 2), list("literal", 3))),
+          list("binary_operator_combination",
+	       "*",
+	       list("literal", 2), list("literal", 3))),
      list("literal", 4))
 ```
 using the [list notation](https://sourceacademy.org/sicpjs/2.2.1#p4) of SICP JS. A [recursive
@@ -57,7 +59,8 @@ function evaluate(expr) {
            : error(expr, "Unknown expression: ");
 }
 ```
-where the `apply` function uses the appropriate JavaScript operation to compute the result
+where the `apply` function uses the appropriate JavaScript operator to compute the result of
+binary operator combinations
 ``` js
 function apply(operator, operands) {
     const first_op = head(operands);
@@ -129,7 +132,7 @@ of the sequence. The result of evaluating the program
 8 + 34; true ? 1 + 2 : 17;
 ```
 is 3, because the result of evaluating the first statement of the sequence `8 + 34` is ignored, and
-the conditional expression evaluates `1 + 2` because its predicate is true.
+the conditional expression evaluates to the result of `1 + 2` because its predicate is true.
 
 The boolean values `true` and `false` are literal values like numbers, so the only additional
 cases in [this evaluator](https://share.sourceacademy.org/1rsj3) (click on the link for
@@ -191,7 +194,7 @@ const y = 4;
 }
 ```
 which evaluates to 22 because in the program, the name `y` is declared to be 4, and in the
-block (delimited by braces `{...}`) then name `x` is declared to be `y + 7`, i.e. 11.
+block (delimited by braces `{...}`) the name `x` is declared to refer to `y + 7`, i.e. 11.
 Declarations that use JavaScript's `const` and `let` enjoy block scope. To handle declarations within
 blocks and occurrences of names in their scope,
 [this evaluator](https://share.sourceacademy.org/rhl4t) (click to see the new syntax
@@ -212,7 +215,11 @@ function evaluate(comp, env) {
 ```
 This version of the function `evaluate` has a new parameter `env` that keeps track of the names
 that are declared
-in any given scope and the values that these names refer to at any given time. The function
+in any given scope and the values that these names refer to at any given time. The evaluation of
+a name occurrence looks up the value associated with the symbol (string) of the name in the
+environment using `lookup_symbol_value`.
+
+The function
 `eval_block` scans out the local names that are declared in the body of a given block, and evaluates
 the body in an environment that extends the current environment by bindings of the local names
 to their initial value `*unassigned*`.
@@ -238,7 +245,6 @@ function eval_declaration(component, env) {
         declaration_symbol(component), 
         evaluate(declaration_value_expression(component), env),
         env);
-  return undefined;
 }
 ```
 To get declarations to work outside of any block, the function `parse_and_evaluate` wraps the
@@ -296,10 +302,11 @@ function evaluate(component, env) {
 }
 ```
 Operator combinations are now treated as function applications, using the function
-`operator_comb_to_application`, and function declarations are treated as lambda
+`operator_comb_to_application`, and function declarations are treated as constant
+declarations with lambda
 expressions, using the function `function_decl_to_constant_decl`. The function `apply`
-for evaluation of function applications
-is reminiscent of the evaluation of blocks. It creates a new environment in which the
+for evaluating function applications
+is reminiscent of evaluating blocks. It creates a new environment in which the
 function parameters refer to the already evaluated arguments, and then returns
 the result of evaluating the body of the function with respect to the new environment.
 ``` js
@@ -347,9 +354,9 @@ gives the expected result of 24.
 ## Adding return statements
 
 The [final evaluator](https://share.sourceacademy.org/fadhu)
-handles return statements, which are included in languages like C, Java, Python, and
-JavaScript. Returns statements allow the programmer to return from a function from anywhere in the
-body of the function. Whatever statements in the body that remain to be evaluated are ignored.
+handles return statements, a prominent feature in languages like C, Java, Python, and
+JavaScript. Returns statements allow the programmer to return from a function from anywhere in its
+body. Whatever statements in the body that remain to be evaluated are ignored.
 For example, in JavaScript, the program
 ``` js
 function f(x) {
@@ -365,7 +372,7 @@ function f(x) {
 f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the
-caller, ignoring the subsequent statements `44;` and `66;` that would otherwise
+caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise
 remain to be evaluated in the body. To achieve this, the `evaluate` function 
 ``` js
 function evaluate(component, env) {
@@ -464,7 +471,7 @@ f(1);
 results in the expected value 3.
 
 The factorial function above needs to have a `return` added, because otherwise
-it would always return `undefined`.
+it would always return `undefined`. The example program
 ``` js
 parse_and_evaluate(`               
 function factorial(n) {
@@ -482,5 +489,5 @@ process even if the underlying implementation of JavaScript has proper tail call
 rise to an iterative process according to the
 [SICP JS terminology](https://sourceacademy.org/sicpjs/1.2.1), because both the
 wrapping of return values in `eval_return_statement` and their unwrapping in
-`apply` are deferred operations. In a future blog post, I'll show an evaluator that
+`apply` are *deferred operations*. In a future blog post, I'll show an evaluator that
 fixes this.
