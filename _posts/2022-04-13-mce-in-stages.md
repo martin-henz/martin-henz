@@ -14,7 +14,7 @@ metacircular
 evaluator](https://sourceacademy.org/sicpjs/4.1.1) for the subset of JavaScript that is used throughout
 the book. Teaching this metacircular
 evaluator is a challenge because it is conceptually rich and because it is often the first medium-sized
-program that the students encounter (around 500 lines). In this blog post I share a teaching
+program that students encounter (around 500 lines). In this blog post I share a teaching
 technique that I've found to be useful. The idea is to introduce the metacircular evaluator in stages,
 starting from a simple calculator language, and gradually extend the language to become a more and
 more realistic programming language. This way, the main concepts are revealed step-by-step, and the
@@ -79,7 +79,8 @@ function list_of_values(exprs) {
     return map(evaluate, exprs); 
 }
 ```
-The following syntax functions separate the exact representation of the syntax tree from the interpreter.
+The following syntax functions separate the concrete representation of the syntax tree from the
+evaluation.
 ``` js
 // literal
 
@@ -114,23 +115,24 @@ function parse_and_evaluate(program) {
     return evaluate(parse(program));
 }
 ```
-For example `parse_and_evaluate("1 + 2 * 3 - 4;"));` returns the number 3.
+For example `parse_and_evaluate("1 + 2 * 3 - 4;"));` returns the expected result, the number 3.
 
 ## Adding booleans, conditionals, and sequences
 
-The next evaluator extends the calculator language by adding the boolean values `true` and
+The [next evaluator](https://share.sourceacademy.org/1rsj3) extends the calculator language by
+adding the boolean values `true` and
 `false`, conditional expressions and sequences of statements. In JavaScript, the component
 statements of a sequence are evaluates in the order in which they appear, and the result
 in the case of this JavaScript sublanguage is the result of evaluating the last statement
-of the sequence. Therefore the result of evaluating the program
+of the sequence. The result of evaluating the program
 ``` js
 8 + 34; true ? 1 + 2 : 17;
 ```
-is 3; the result of evaluating the first statement of the sequence (8 + 34) is ignored, and
+is 3, because the result of evaluating the first statement of the sequence `8 + 34` is ignored, and
 the conditional expression evaluates `1 + 2` because its predicate is true.
 
 The boolean values `true` and `false` are literal values like numbers, so the only additional
-cases in [the next evaluator](https://share.sourceacademy.org/1rsj3) (click on the link for
+cases in [this evaluator](https://share.sourceacademy.org/1rsj3) (click on the link for
 all necessary syntax and support functions) handle conditionals and sequences.
 ``` js
 function evaluate(comp) { 
@@ -179,7 +181,8 @@ the consequent expression.
 
 ## Adding blocks, declarations, and names
 
-The next stage adds blocks, `const` declarations, and names. A typical example is
+The [next evaluator](https://share.sourceacademy.org/rhl4t) adds blocks, `const` declarations,
+and names. A typical example is
 ``` js
 const y = 4; 
 {
@@ -191,7 +194,7 @@ which evaluates to 22 because in the program, the name `y` is declared to be 4, 
 block (delimited by braces `{...}`) then name `x` is declared to be `y + 7`, i.e. 11.
 Declarations that use JavaScript's `const` and `let` enjoy block scope. To handle declarations within
 blocks and occurrences of names in their scope,
-[the next evaluator](https://share.sourceacademy.org/rhl4t) (click to see the new syntax
+[this evaluator](https://share.sourceacademy.org/rhl4t) (click to see the new syntax
 and support functions) adds the functions `eval_block` and `eval_declaration`.
 ``` js
 function evaluate(comp, env) { 
@@ -208,7 +211,8 @@ function evaluate(comp, env) {
            : error(comp, "Unknown component:");
 }
 ```
-This function `evaluate` has a new parameter `env` that keeps track of the names that are declared
+This version of the function `evaluate` has a new parameter `env` that keeps track of the names
+that are declared
 in any given scope and the values that these names refer to at any given time. The function
 `eval_block` scans out the local names that are declared in the body of a given block, and evaluates
 the body in an environment that extends the current environment by bindings of the local names
@@ -253,14 +257,15 @@ const y = 4;
 {
     const x = y + 7; 
     x * 2;
-}
-    `);
+}`);
 ```
 yields the expected value 3.
 
 ### Adding functions (with implicit return)
 
-The next step deviates a bit from JavaScript, to handle function declarations and lambda expressions
+The
+[next evaluator](https://share.sourceacademy.org/ui2bk) deviates a bit from JavaScript,
+to handle function declarations and lambda expressions
 in the simplest possible way. In this JavaScript variant, the return value of a function is the result
 of evaluating the function body; there is no need or use for return statements in this language.
 For example, the function `fact` in this language
@@ -270,7 +275,7 @@ function fact(n) {
 }
 ```
 computes the factorial function for positive integers. To make this happen, the `evaluate` function
-in the [next evaluator](https://share.sourceacademy.org/ui2bk)
+in the [this evaluator](https://share.sourceacademy.org/ui2bk)
 needs to include cases for function declarations, function applications, and lambda expressions.
 ``` js
 function evaluate(component, env) { 
@@ -314,16 +319,9 @@ function apply(fun, args) {
 The function `apply` delegates the application of primitive functions to the function
 `apply_primitive_function`. 
 ``` js
-function apply(fun, args) {
-    return is_primitive_function(fun)
-           ? apply_primitive_function(fun, args) 
-           : is_compound_function(fun)
-           ? evaluate(function_body(fun),
-                      extend_environment( 
-                          function_parameters(fun), 
-                          args, 
-                          function_environment(fun)))
-           : error(fun, "Unknown function type:");
+function apply_primitive_function(fun, arglist) {
+    return apply_in_underlying_javascript(
+               primitive_implementation(fun), arglist);
 }
 ```
 In order to provide bindings for predeclared names, the function `parse_and_evaluate` now
@@ -349,7 +347,8 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The final step handles return statements, which are included in languages like C, Java, Python, and
+The [final evaluator](https://share.sourceacademy.org/fadhu)
+handles return statements, which are included in languages like C, Java, Python, and
 JavaScript. Returns statements allow the programmer to return from a function from anywhere in the
 body of the function. Whatever statements in the body that remain to be evaluated are ignored.
 For example, in JavaScript, the program
@@ -368,40 +367,21 @@ f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the
 caller, ignoring the subsequent statements `44;` and `66;` that would otherwise
-remain to be evaluated in the body. To achieve this, the `evaluate` function
+remain to be evaluated in the body. To achieve this, the `evaluate` function 
 ``` js
 function evaluate(component, env) {
 //    display_list(component);
     return is_literal(component)
            ? literal_value(component)
-           : is_name(component)
-           ? lookup_symbol_value(symbol_of_name(component), env)
-           : is_application(component)
-           ? apply(evaluate(function_expression(component), env),
-                   list_of_values(arg_expressions(component), env))
-           : is_operator_comb(component)
-           ? evaluate(operator_comb_to_application(component),
-                      env)
-           : is_conditional(component)
-           ? eval_conditional(component, env)
-           : is_lambda_expression(component)
-           ? make_function(lambda_parameter_symbols(component),
-                           lambda_body(component), env)
-           : is_sequence(component)
-           ? eval_sequence(sequence_statements(component), env)
-           : is_block(component)
-           ? eval_block(component, env)
+           ...
            : is_return_statement(component)
            ? eval_return_statement(component, env)
-           : is_function_declaration(component)
-           ? evaluate(function_decl_to_constant_decl(component), env)
-           : is_declaration(component)
-           ? eval_declaration(component, env)
-           : is_assignment(component)
-           ? eval_assignment(component, env)
+           ...
            : error(component, "unknown syntax -- evaluate");
 }
 ```
+in
+[this evaluator](https://share.sourceacademy.org/fadhu)
 uses the function `eval_return_statement`
 ``` js
 function eval_return_statement(component, env) {
@@ -497,3 +477,10 @@ function factorial(n) {
 factorial(4);`);
 ```
 results in the expected value 24.
+
+Note that the recursive evaluator presented in this section gives rise to a recursive
+process even if the underlying implementation of JavaScript has proper tail calls
+(such as the Safari browser), and even if the given program being interpreted is giving
+rise to an iterative process according to the
+[SICP JS terminology](https://sourceacademy.org/sicpjs/1.2.1).
+In a future blog post, I'll show an evaluator that fixes this.
