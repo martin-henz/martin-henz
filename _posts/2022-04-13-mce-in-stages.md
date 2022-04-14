@@ -424,7 +424,7 @@ function eval_sequence(stmts, env) {
 ```
 The function `apply` now checks whether the result of evaluating the body of the
 function that is being applied is a return value, in which case it unwraps the
-return value.
+return value using the `return_value_content` function above.
 ``` js
 function apply(fun, args) {
     if (is_primitive_function(fun)) {
