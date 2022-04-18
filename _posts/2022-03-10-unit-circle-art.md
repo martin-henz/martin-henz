@@ -171,11 +171,11 @@ connect_points(84, k => k * k * k * k * k * k * k);
 
 ## Connecting Lines
 
-Another way of connecting points on the unit circle using 
+Another way of connecting points on the unit circle using
 a function `f` is to draw a line from `i` to `f(i)`, for each `i`
 from 0 to `n`. That can be accomplished using the `connect_points`
-abstraction, by connecting (1) the point at i with (2) the 
-point at f(i), then (3) going back to i, which explains the
+abstraction, by connecting (1) the point at `i` with (2) the
+point at `f(i)`, then (3) going back to `i`, which explains the
 occurrences of the number 3 in the program.
 ```js
 const connect_lines =
