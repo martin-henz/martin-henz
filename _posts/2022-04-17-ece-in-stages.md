@@ -13,7 +13,8 @@ of JavaScript in a step-by-step fashion.
 The result relies heavily on recursion in the host language (the language in which the
 evaluator is written, which is also JavaScript), and results in
 recursive processes even when the interpreted functions are all tail-recursive and thus
-should give rise to iterative processes (following the terminology of SICP). In this post,
+should give rise to iterative processes (following the
+[SICP JS terminology](https://sourceacademy.org/sicpjs/1.2.1)). In this post,
 I'm going to fix this: I will present an evaluator that runs in a simple loop that can
 be implemented in a low-level language without recursion, and functions that give rise to
 iterative processes in JavaScript also give rise to iterative processes when evaluated using
@@ -384,6 +385,9 @@ the recursive evaluator.
             operands = pair(undefined, operands);
 	} else ...
 ```
+The value `undefined` is pushed on the operand stack as the value of
+the constant declaration that gave rise to the assign instruction.
+
 As the other instructions, assign instructions are tagged lists.
 ``` js
 function make_assign_instruction(symbol) {
@@ -396,15 +400,15 @@ function assign_symbol(instr) {
     return head(tail(instr));
 }
 ```
-and declarations outside of any block are also handled by wrapping the
-given program in an implicit block.
+Declarations outside of any block are handled by wrapping the
+given program in an implicit block, as done in the recursive evaluator.
 ``` js
 function parse_and_evaluate(program) {
     return evaluate(make_block(parse(program)), 
                     the_empty_environment);
 }
 ```
-Then
+With this, the example
 ``` js
 parse_and_evaluate(`
 const y = 4; 
@@ -428,7 +432,7 @@ function fact(n) {
 computes the factorial function for positive integers.
 
 To make this happen in an explicit-control evaluator, the `evaluate` function
-in the [this evaluator]()
+in the this evaluator
 needs to include cases for function declarations, lambda expressions, and
 function applications. Function declarations are translated to constant declarations
 as you have seen in the recursive evaluator.
@@ -458,8 +462,9 @@ Operator combinations are treated as function applications, using the function
                               continuation);
         } else ...
 ```
-The final task for this evaluator is to handle function application. To avoid recursion,
-the evaluator needs to keep track of the components of the application explicitly so that
+The final task for this evaluator is to handle function application. To make control
+explicit, 
+the evaluator needs to keep track of the components of the application so that
 they are evaluated in the given order. It then remembers to carry out the application
 using a *call instruction*.
 ``` js
@@ -473,7 +478,15 @@ using a *call instruction*.
 ```
 The call instruction remembers the number of arguments
 ``` js
-
+function make_call_instruction(arity) {
+    return list("call_instruction", arity);
+}
+function is_call_instruction(instr) {
+    return is_tagged_list(instr, "call_instruction");
+}
+function call_instruction_arity(instr) {
+    return head(tail(instr));
+}
 ```
 so that it can pop the correct number of arguments from the operand stack and
 carry out the function application.
@@ -506,7 +519,7 @@ carry out the function application.
 	} else ...
 ```
 If the function is primitive, the function `apply_in_underlying_javascript` carries
-out the actual application. If the function is compound, the body of the function
+out the application. If the function is compound, the body of the function
 is prepended to the continuation, which is thunkified with the current environment.
 The new environment with respect to which the body is evaluated is the result
 of extending the function's environment with a binding of the parameters (taken from
@@ -561,7 +574,7 @@ The difficulty with evaluating explicit return statements is that evaluation nee
 remaining statements of the funciton, regardless how deeply nested the return statement is in
 surrounding block statements. The evaluate function cannot rely on the continuation to find the place
 where evaluation should resume. Instead, a new variable called `runtime_stack` keeps track of the
-continuation after a function call.
+continuation after a function call and the environment with respect to which to evaluate it.
 ``` js
 function evaluate(program) {
     let components = list(program);
@@ -582,7 +595,8 @@ function evaluate(program) {
     return head(operands);
 } 
 ```
-The call instruction stores the continuation by pushing a new runtime stack frame onto the
+The call instruction stores the continuation and its environment
+by pushing a new runtime stack frame onto the
 runtime stack.
 ``` js
         } else if (is_call_instruction(component)) {
@@ -738,7 +752,7 @@ fact(5);
 ```
 However, if you choose to use conditional expressions rather than conditional statements,
 the clause above does not get used and a call instruction is used instead of a
-tail call instruction.
+tail call instruction, which results in non-constant space consumption.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -754,7 +768,7 @@ function fact_iter(n, i, acc) {
 fact(5);
 `);
 ```
-The following clause, inserted in front of the handling of return statements
+The following clause, inserted in front of the handling of return statements,
 takes care of this case.
 ``` js
         } else if (is_return_statement(component) &&
@@ -769,7 +783,7 @@ takes care of this case.
                               make_return_instruction());
 ```
 It translates conditional expressions in return statements into conditional
-statements using the function `return_cond_expr_to_cond_stmt(component`.
+statements using the function `return_cond_expr_to_cond_stmt`.
 ``` js
 function return_cond_expr_to_cond_stmt(stmt) {
     const cond_expr = return_expression(stmt);
@@ -779,3 +793,9 @@ function return_cond_expr_to_cond_stmt(stmt) {
                make_return_statement(conditional_alternative(cond_expr)));
 }
 ```
+This evaluator makes control explicit by keeping tack of continuations. To do so,
+it translates complex expressions such as function applications into sequences
+of instructions. The next post will take this idea further, by *compiling* the
+entire program into a sequence of instruction, thereby cleanly separating
+compilation of a program from execution of the *machine code* that
+results from the compilation.

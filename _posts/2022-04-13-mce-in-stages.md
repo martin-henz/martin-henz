@@ -487,7 +487,7 @@ Note that the recursive evaluator presented in this section gives rise to a recu
 process even if the underlying implementation of JavaScript has proper tail calls
 (such as the Safari browser), and even if the given program being interpreted is giving
 rise to an iterative process according to the
-[SICP JS terminology](https://sourceacademy.org/sicpjs/1.2.1), because both the
+[SICP terminology](https://sourceacademy.org/sicpjs/1.2.1), because both the
 wrapping of return values in `eval_return_statement` and their unwrapping in
 `apply` are *deferred operations*. In a future blog post, I'll show an evaluator that
 fixes this.
