@@ -14,7 +14,7 @@ The result mixes compilation steps that manage control using a list of instructi
 that I called *continuation* with execution steps where previously compiled instructions
 are executed with the help of an environment, an operand stack, and a runtime stack.
 Compilation was done on-the-fly, and function bodies needed to be recompiled, each time
-their were executed. This post fixes this by cleanly separating a compiler from a
+they were executed. This post fixes this by cleanly separating a compiler from a
 machine. The compiler compiles the given program by writing instructions into an array
 without executing them, and the machine executes these instructions without ever referring
 to the original program. As in the previous post, I proceed in stages
@@ -49,7 +49,7 @@ list("binary_operator_combination",
 using the [list notation](https://sourceacademy.org/sicpjs/2.2.1#p4) of SICP JS. The 
 explicit-control evaluator described in
 [the previous post](https://martin-henz.github.io/martin-henz/2022/04/17/ece-in-stages.html) 
-consisted in a function `evaluate` that mixes compilation with execution. The values
+consisted in a function `evaluate` that mixed compilation with execution. The values
 of literals were pushed on an *operand stack*.
 Binary operator
 combinations were compiled on-the-fly to instructions, and instructions were executed
@@ -88,7 +88,7 @@ function evaluate(program) {
 ```
 The
 [virtual-machine-based implementation of the calculator language](https://share.sourceacademy.org/7ibc1)
-separates compilation from execution. It first compiles the given program into
+of this post separates compilation from execution. It compiles the given program into
 an array of instructions, without executing them.
 ``` js
 function compile(expr) {
@@ -114,8 +114,7 @@ function compile(expr) {
     return instrs;
 } 
 ```
-A literal is compiled by generating *load-constant instruction*, which will
-push the literal value on the operand stack when it gets executed.
+A literal is compiled by generating a `load_constant` instruction.
 ``` js
 function load_constant(value) {
     return list("load_constant", value);
@@ -147,12 +146,13 @@ from above is compiled into the array
 ```
 where the array indices of the instructions are added for clarity.
 
-As in the explicit-control evaluator, an operand stack keeps track of
+As in the explicit-control evaluator, an *operand stack* keeps track of
 the operands of operation instructions.
-The machine that runs the instructions by executing them one after the other,
-using a *program counter* to keep track of the next instruction to execute, until
+The machine runs the instructions by executing them one after the other,
+using a *program counter* `pc` to keep track of the next instruction to execute, until
 the `done` instruction is reached, at which point the final result is on
-top of the operand stack.
+top of the operand stack. The variables `operand_stack` and `pc` keep track
+of the state of the machine. They are called *registers*.
 ``` js
 function run(instrs) {
     let operands = null;
@@ -215,8 +215,8 @@ expressions.
       } else ...			
 ```
 To cleanly separate compilation from execution, the compiler generates *jump* instructions
-that contain the addresses of the compiled branches, rather than *branch* instructions
-of the explicit-control evaluator that contained uncompiled components.
+that contain the addresses of the compiled branches, rather than the explicit-control evaluator's
+*branch* instructions that contained uncompiled components.
 ``` js
 function compile(program) {
     let wc = 0;
@@ -271,7 +271,7 @@ code.
 The `jump_on_false` instruction carries the address to jump to, in case the
 value on top of the operand stack is not truthy. If it is truthy, the code
 generated from the consequent expression is executed, followed by a `goto`
-instruction, which jumps to the code after the code for the alternative
+instruction that jumps to the code after the code for the alternative
 expression. The implementation of the two instructions `jump_on_false` and
 `goto` manipulate the program counter to achieve the desired effect.
 ``` js
@@ -326,7 +326,7 @@ function compile(program) {
 ```
 The result of evaluating every sequence component except the last one
 is popped from the operand stack by the pop instruction which is implemented
-in the execution loop of the `run` function as follows.
+in the execution loop of the machine as follows.
 ``` js
         } else if (is_pop_instruction(instr)) {
             pc = pc + 1;
@@ -355,7 +355,7 @@ which evaluates to 22 because in the program, the name `y` is declared to be 4, 
 block (delimited by braces `{...}`) the name `x` is declared to refer to `y + 7`, i.e. 11.
 
 Similar to the recursive evaluator for blocks, declarations, and names, 
-the `run` function uses
+the machine uses
 an environment that keeps track of the names that are declared in any
 given scope and the values that these names refer to at any given time.
 To achieve this, the compiler generates `enter_scope` and `exit_scope`
@@ -381,13 +381,29 @@ function compile(program) {
     return instrs;
 }
 ```
-Whereas the explicit-control evaluator was able to use the continuation to keep track
-of the environment using thunks, I decided to use *block frames* on the
-runtime stack for this purpose. When entering a block, the current environment
+Whereas the explicit-control evaluator used the continuation to keep track
+of the environment with thunks, I decided to use *block frames* on a
+*runtime stack* for this purpose. Thus the machine has two new registers,
+`environment` and `runtime_stack`.
+``` js
+function run(instrs) {
+    let operands = null;
+    let pc = 0;
+    let environment = the_empty_environment;
+    let runtime_stack = null;
+    while (! is_done_instruction(instrs[pc])) {
+        const instr = instrs[pc];
+        if (...(instr)) ...
+    }
+    return head(operands);
+} 
+```
+When entering a block, the current environment
 is saved in a block frame before it is replaced by the extended environment for
 execution of the block's code. When exiting a block, the saved environment is
 retrieved from the block frame and reestablished.
 ``` js
+        // additional clauses in machine
         } else if (is_enter_scope_instruction(instr)) {
             pc = pc + 1;
             runtime_stack = pair(make_runtime_stack_block_frame(
@@ -418,23 +434,13 @@ Names are compiled into `load` instructions
 which are executed by pushing onto the operand stack
 the result of looking up the name in the environment.
 ``` js
-function run(instrs) {
-    let operands = null;
-    let pc = 0;
-    let environment = the_empty_environment;
-    let runtime_stack = null;
-    while (! is_done_instruction(instrs[pc])) {
-        const instr = instrs[pc];
-        if (...) ...
+        // additional clause in machine
         } else if (is_load_instruction(instr)) {
             pc = pc + 1;
             operands = pair(lookup_symbol_value(load_symbol(instr),
                                                  environment),
                             operands);
         } else ...
-    }
-    return head(operands);
-}    
 ```
 Constant declarations are compiled by compiling the value expression 
 followed by an assign instruction.
@@ -459,14 +465,7 @@ function compile(program) {
 and the machine executes an assign instruction by changing
 the environment using `assign_symbol_value`.
 ``` js
-function run(instrs) {
-    let operands = null;
-    let pc = 0;
-    let environment = the_empty_environment;
-    let runtime_stack = null;
-    while (! is_done_instruction(instrs[pc])) {
-        const instr = instrs[pc];
-        if (...) ...
+        // additional clause in machine
         else if (is_assign_instruction(instr)) {
             pc = pc + 1;
             // assign_symbol_value destructively updates env
@@ -474,12 +473,7 @@ function run(instrs) {
             environment = assign_symbol_value(assign_symbol(instr),
                                               head(operands),
                                               environment);
-        } else {
-            error(instr, "Unknown instruction: ");
-        }
-    }
-    return head(operands);
-} 
+        } else ...
 ```
 As in the previous evaluators, 
 declarations outside of any block are handled by wrapping the
@@ -490,7 +484,11 @@ function parse_and_evaluate(program) {
                     the_empty_environment);
 }
 ```
-With this, the example
+The example program above is compiled into
+``` js
+
+```
+and its execution via
 ``` js
 parse_and_evaluate(`
 const y = 4; 
