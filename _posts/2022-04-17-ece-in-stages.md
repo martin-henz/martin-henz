@@ -88,7 +88,7 @@ function evaluate(program) {
     let components = list(program);
     let operands = null;
     while (! is_null(components)) {
-        const expression = head(components);
+        const component = head(components);
         const continuation = tail(components);
 	...
     }
@@ -96,10 +96,9 @@ function evaluate(program) {
 }
 ```
 It consists of a while loop that processes the first of a list of components,
-starting with the one-element list containing the given program, assumed to
-be an expression statement.
+starting with the one-element list containing the given calculator program.
 The evaluation is done when there are no more components to evaluate, in which case
-the final result is the only remaining element of the operand stack.
+the final result is the only remaining element on the operand stack.
 
 When the first
 component is a literal, its value its pushed on the operand stack.
@@ -120,7 +119,7 @@ component is a literal, its value its pushed on the operand stack.
 ```
 When the loop encounters a binary operator combination, it prepends to the continuation
 the two operand expressions and a *binary operator instruction*, which is a data structure that 
-contains the operator.
+contains the operator symbol.
 ``` js
         } else if (is_operator_comb(component)) {
             components = 
@@ -146,7 +145,8 @@ function binary_operator_instruction_operator(x) {
 }
 ```
 Evaluation of a binary operator instruction pops two operands from the operand stack, applies
-the operator on them using the `apply` function, and pushes the result back on the operand stack.
+the operator on them using the `apply` function (see the recursive evaluator of the calculator
+language in the previous post), and pushes the result back on the operand stack.
 ``` js
         } else if (is_binary_operator_instruction(component)) {
             components = continuation;
@@ -255,8 +255,7 @@ function prepend_statements(statements, continuation) {
 }
 ```
 The result of evaluating every sequence component except the last one
-is popped from the operand stack by the pop instruction which is implemented
-as follows.
+is popped from the operand stack by the pop instruction.
 ``` js
       } else if (is_pop_instruction(component)) {
           components = continuation;
@@ -296,10 +295,7 @@ function evaluate(program) {
     while (!is_null(components)) {
         const component = head(components);
         const continuation = tail(components);
-        if (is_literal(component)) {
-            components = continuation;
-            operands = pair(literal_value(component), operands);
-	else ... // handle other kinds of components
+        ...
     }
     return head(operands);
 } 
@@ -334,12 +330,7 @@ with respect to the old environment. The function `thunkify` creates such a thun
 the continuation is not empty.
 ``` js
 function thunkify(components, env) {
-    // avoid creating unnecessary thunks
-    if (is_null(components)) {
-        return null;
-    } else {
-        return list(list("thunk", components, env));
-    }
+    return is_null(components) ? null : list(list("thunk", components, env));
 }
 ```
 Thunks are tagged lists, identified and accessessed as follows.
@@ -443,6 +434,8 @@ as you have seen in the recursive evaluator.
         } else ...
 ```
 The evaluation of lambda expressions pushes a function object on the operand stack.
+The parameter list is reversed to match the arguments of a function call, which
+will appear on the operand stack in reverse order.
 ``` js
         } else if (is_lambda_expression(component)) {
             components = continuation;
@@ -488,8 +481,8 @@ function call_instruction_arity(instr) {
     return head(tail(instr));
 }
 ```
-so that it can pop the correct number of arguments from the operand stack and
-carry out the function application.
+so that it can pop the correct number of arguments from the operand stack to
+find the callee function: the function to be applied.
 ``` js
         } else if (is_call_instruction(component)) {
             const arity = call_instruction_arity(component);
@@ -518,23 +511,22 @@ carry out the function application.
             }
 	} else ...
 ```
-If the function is primitive, the function `apply_in_underlying_javascript` carries
+If the callee function is primitive, the function `apply_in_underlying_javascript` carries
 out the application. If the function is compound, the body of the function
 is prepended to the continuation, which is thunkified with the current environment.
 The new environment with respect to which the body is evaluated is the result
 of extending the function's environment with a binding of the parameters (taken from
-the function value) to the arguments (taken from the operand stack).
+the function value) to the arguments (taken from the operand stack), both in reverse order.
 
 In order to provide bindings for predeclared names, the function `parse_and_evaluate`
-uses `the_global_environment` as its initial environment.
+uses `the_global_environment` from the previous post as its initial environment.
 ``` js
 function parse_and_evaluate(program) {
     return evaluate(make_block(parse(program)), 
                     the_global_environment);
 }
 ```
-`the_global_environment` contains bindings of all predeclared
-functions to their respective `primitive` functions. The application of
+The application of
 our example factorial function to 4
 ``` js
 parse_and_evaluate(`
@@ -571,8 +563,8 @@ caller, ignoring the subsequent expression statements `44;` and `66;` that would
 remain to be evaluated in the body.
 
 The difficulty with evaluating explicit return statements is that evaluation needs to abandon the
-remaining statements of the funciton, regardless how deeply nested the return statement is in
-surrounding block statements. The evaluate function cannot rely on the continuation to find the place
+remaining statements of the function, regardless how many nested block statements surround
+the return statement. The `evaluate` function cannot rely on the continuation to find the place
 where evaluation should resume. Instead, a new variable called `runtime_stack` keeps track of the
 continuation after a function call and the environment with respect to which to evaluate it.
 ``` js
@@ -650,17 +642,37 @@ function runtime_stack_frame_environment(sf) {
     return head(tail(tail(sf)));
 }
 ```
+In JavaScript, the value `undefined` is returned if the evaluation of the function body
+does not encounter any return statements. The following modification in the evaluation
+of lambda expressions achieves this effect by appending a `return undefined;` to every
+function body.
+``` js
+        } else if (is_lambda_expression(component)) {
+            components = continuation;
+            operands = pair(make_function(reverse(lambda_parameter_symbols(component)),
+                                          make_sequence(
+                                              list(lambda_body(component),
+                                                   // we insert 
+                                                   // return undefined
+                                                   make_return_statement(
+                                                       make_literal(
+                                                           undefined)))),
+                                        environment),
+                          operands);
+        } else ...
+```
 In contrast with the recursive evaluator, this explicit control evaluator
-does not need to handle any return values during the evaluation of function bodies.
+does not need to handle any special "return values" during the evaluation of function bodies.
 The evaluation of sequences and function application remains unaffected by return statements.
 
 However, the evaluator as presented so far will exhibit non-constant space consumption
-when the interpreted function should give rise to an iterative process because the evaluation
+even if the interpreted function should give rise to an iterative process because the evaluation
 of every call instruction pushes a new frame onto the runtime stack. If the call
-instruction is the last instruction that belongs to the body of the function, there is
-no need for pushing a runtime stack frame. Instead the callee function can return the
-function that called the function in which the call occurred. The evaluator can identify such
-*tail calls* during evaluation using following clause placed in front of the clause
+instruction is the last instruction that belongs to the body of the function, we say it is
+a *tail call". In that case, there is no need for pushing a runtime stack frame. Instead the 
+callee function can return to the
+place that called the function in which the tail call occurred. The evaluator can identify
+tail calls during evaluation using following clause placed in front of the clause
 for return statements.
 ``` js
         } else if (is_return_statement(component) && 
@@ -713,6 +725,7 @@ the runtime stack.
                 components = list(callee_body);
                 operands = remaining_operands;
                 environment = new_environment;
+                // runtime_stack remains unchanged
             }            
         } else ...
 ```
