@@ -621,13 +621,20 @@ on top of the operand stack, so when the return instruction jumps back to the
 caller, the operand stack holds the return value of the callee compound function,
 similar all other instructions that produce a value.
 
-In order to provide bindings for predeclared names, the function `parse_and_evaluate`
+In order to provide bindings for predeclared names, the `run` function 
 uses `the_global_environment` as its initial environment.
 ``` js
-function parse_and_evaluate(program) {
-    return evaluate(make_block(parse(program)), 
-                    the_global_environment);
-}
+function run(instrs) {
+    let operands = null;
+    let pc = 0;
+    let environment = the_global_environment;
+    let runtime_stack = null;
+    while (! is_done_instruction(instrs[pc])) {
+        const instr = instrs[pc];
+        if (...(instr)) ...
+    }
+    return head(operands);
+} 
 ```
 `the_global_environment` contains bindings of all predeclared
 functions to their respective `primitive` functions.
@@ -812,7 +819,7 @@ stack for every function call.
 The following evaluation has constant space consumption because a tail call instruction
 is used instead of a call instruction.
 ``` js
-parse_and_evaluate(`
+parse_compile_run(`
 function fact(n) {
     return fact_iter(n, 1, 1);
 }
@@ -830,7 +837,7 @@ However, if you choose to use conditional expressions rather than conditional st
 the clause above does not get used and a call instruction is used instead of a
 tail call instruction, which results in non-constant space consumption.
 ``` js
-parse_and_evaluate(`
+parse_compile_run(`
 function fact(n) {
     return fact_iter(n, 1, 1);
 }
