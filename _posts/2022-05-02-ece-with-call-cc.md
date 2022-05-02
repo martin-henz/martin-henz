@@ -68,7 +68,7 @@ applied, which means I need to come up with a modified *calling convention* for 
 functions. With that in place, the primitive function `callcc` can be added to
 the environment that is used for evaluating a given program.
 
-## A new calling convention for primitive functions
+## Tweaking the calling convention for primitive functions
 
 Recall that the explicit-control evaluator compiles a function application into
 a sequence of components in the continuation: the function expression, followed
@@ -129,15 +129,15 @@ after execution of the primitive implementation.
 Therefore, the primitive implementation can make
 changes to `operands`, which will survive after execution of the call
 instruction. Regardless what changes the primitive implementation is
-making on `operands`, the return value is guaranteed to become the
+making on `operands`, the return value is guaranteed to become its
 first value.
 
 Note that this modified calling convention does not make a difference
-for any existing primitive functions, because they do not modify `operands'.
+for any existing primitive functions, because they do not modify `operands`.
 
 ## Implementing `callcc`
 
-We make use of this new calling convention by implementing `callcc` as
+With this tweak in place, I implement `callcc` as
 a primitive function, which is made available to the evaluator
 in the initial environment that the evaluator starts with.
 ``` js
@@ -269,9 +269,10 @@ display(callcc(exit => {
 `);
 ```
 Here, the function to which `callcc` is applied passes a function to
-`for_each` which calls the continuation `exit` if a particular value
-(`"nuclear"`) is processed. When that happens, control immediately returns
-to the place where `callcc` was called, with the argument of `exit` as
+`for_each` which calls the continuation `exit` if the value
+`"nuclear"` is encountered. When that happens, control immediately returns
+to the place where `callcc` was called, with the argument of `exit`, here
+the string `"nuclear alarm"`, as
 return value. Therefore, the program displays the following:
 ``` js
 "this"
