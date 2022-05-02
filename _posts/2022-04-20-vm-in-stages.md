@@ -933,8 +933,8 @@ ECMAScript 2015. However, the most popular web browsers, Google Chrome and
 Firefox, do not adhere to the ECMAScript standard in this respect. Our
 virtual machine exhibits no additional memory consumption for iterative processes,
 even when the JavaScript implementation does not enjoy proper tail calls.
-However, the compiler we describe above gives rise to a recursive process, which
-is not an issue for programs written by humans, because the recursion depth
+However, the compilers give rise to recursive processes, which
+is not a problem for programs written by humans, because the recursion depth
 is limited by the nesting depth of statements and expressions in the program
 being compiled.
 

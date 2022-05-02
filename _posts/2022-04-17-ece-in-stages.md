@@ -540,7 +540,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final evaluator](https://share.sourceacademy.org/p7tgy)
+The [final evaluator](https://share.sourceacademy.org/gkacq)
 handles return statements, a prominent feature in languages like C, Java, Python, and
 JavaScript. Returns statements allow the programmer to return from a function from anywhere in its
 body. Whatever statements in the body that remain to be evaluated are ignored.
@@ -587,7 +587,8 @@ function evaluate(program) {
     return head(operands);
 } 
 ```
-The call instruction stores the continuation and its environment
+The call instruction stores the continuation and the
+current environment
 by pushing a new runtime stack frame onto the
 runtime stack.
 ``` js
@@ -613,10 +614,10 @@ runtime stack.
                                             callee_environment);
                 components = list(callee_body);
                 operands = remaining_operands;
-                environment = new_environment;
                 runtime_stack = pair(make_runtime_stack_frame(
                                          continuation, environment),
                                      runtime_stack);
+                environment = new_environment;
             }
 	} else ...
 ```
