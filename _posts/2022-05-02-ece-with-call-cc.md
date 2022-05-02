@@ -58,13 +58,13 @@ with argument 2 is that control immediately returns to the place where `callcc` 
 called, with 2 as the return value of the application of `callcc`. The
 statement `return 3;` is not executed in this case. The value 2 is displayed.
 
-## Strategy
+## Implementation Strategy
 
 Implementation of `callcc` in the explicit-control evaluator is not hard, but a bit
 tricky. My strategy is to treat both `callcc` and the continuations as *primitive*
 functions that have direct access to the operand stack, runtime stack, and continuation.
 To make this work, I need to slightly modify the way primitive functions are
-applied, which means I need to come up with a *calling convention* for primitive
+applied, which means I need to come up with a modified *calling convention* for primitive
 functions. With that in place, the primitive function `callcc` can be added to
 the environment that is used for evaluating a given program.
 
@@ -132,6 +132,9 @@ instruction. Regardless what changes the primitive implementation is
 making on `operands`, the return value is guaranteed to become the
 first value.
 
+Note that this modified calling convention does not make a difference
+for any existing primitive functions, because they do not modify `operands'.
+
 ## Implementing `callcc`
 
 We make use of this new calling convention by implementing `callcc` as
@@ -193,8 +196,8 @@ on the continuation, in order to call the function `f` with the current
 continuation. To make sure `f` is called, it will appear in second position
 on the operand stack, after a dummy value `undefined`, which will be
 replaced by the return value of the primitive function, according to the
-new calling convention. The previous dummy value which was placed by
-the call instruction on top of operands is dropped. 
+new calling convention. The previous dummy value, which was placed by
+the call instruction on top of operands, is dropped. 
 
 The continuation itself is also implemented by a primitive function, and
 therefore also has access to the machine state. Here is its implementation.
@@ -227,10 +230,11 @@ function evaluate(program) {
 }
 ```
 The primitive function `callcc` avails to the continuation
-the state of the evaluator at the time `callcc` was called. Note that
-the calling convention places a dummy value `undefined` for
+the state of the evaluator at the time `callcc` was called. 
+When the continuation is called, it restores this state.
+The calling convention places a dummy value `undefined` for
 the return value of `callcc` on top of `operands`.
-When the continuation is called, it restores this state. The return
+The return
 value of the continuation is the argument of the continuation, which
 will replace the dummy value.
 
