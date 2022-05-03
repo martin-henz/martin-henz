@@ -281,7 +281,7 @@ return value. Therefore, the program displays the following:
 "a"
 "nuclear alarm"
 ```
-If you replace the line `"nuclear", "bomb"` with `"neat", "bicycle"`,
+If you replace the line `"nuclear", "bomb",` with `"neat", "bicycle",`,
 the program will display:
 ``` js
 "this"
