@@ -542,7 +542,7 @@ gives the expected result of 24.
 
 The [final evaluator](https://share.sourceacademy.org/gkacq)
 handles return statements, a prominent feature in languages like C, Java, Python, and
-JavaScript. Returns statements allow the programmer to return from a function from anywhere in its
+JavaScript. Return statements allow the programmer to return from a function from anywhere in its
 body. Whatever statements in the body that remain to be evaluated are ignored.
 For example, in JavaScript, the program
 ``` js
