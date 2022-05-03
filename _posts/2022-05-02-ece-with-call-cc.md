@@ -49,10 +49,10 @@ function f(ret) {
 display(f(x => x)); // displays 3
 display(callcc(f)); // displays 2
 ```
-When `f` is called normally, the given function `x => x` is passed as `ret`
-and gets applied to 2. Then
+When `f` is applied normally to a given function `x => x` as `ret`, that function gets
+gets applied to 2. Then
 the evaluation of the body of `f` continues, and `f` returns the value 3. When `f`
-is called using `callcc`, the current continuation of the call site of `callcc` is
+is applied using `callcc`, the current continuation of the call site of `callcc` is
 available as `ret` during the evaluation of the body of `f`. The effect of calling `ret`
 with argument 2 is that control immediately returns to the place where `callcc` was
 called, with 2 as the return value of the application of `callcc`. The
@@ -244,7 +244,7 @@ will replace the dummy value.
 pros and cons of call-with-current-continuation,
 and I recommend that you take a close look if you would like to include
 this feature in your programming language. I'm taking the liberty to
-slightly modify the the "nuclear bomb" example from the wiki,
+slightly modify the "nuclear bomb" example from the wiki,
 which shall conclude this blog post.
 ``` js
 parse_and_evaluate(`
