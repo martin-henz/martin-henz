@@ -49,7 +49,8 @@ function f(ret) {
 display(f(x => x)); // displays 3
 display(callcc(f)); // displays 2
 ```
-When `f` is applied normally to a given function `x => x` as `ret`, that function gets
+When `f` is applied normally to a given function such as
+`x => x` as `ret`, that function gets
 gets applied to 2. Then
 the evaluation of the body of `f` continues, and `f` returns the value 3. When `f`
 is applied using `callcc`, the current continuation of the call site of `callcc` is
