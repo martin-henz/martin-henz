@@ -483,7 +483,7 @@ yields the expected value 3.
 ### Adding functions (with implicit return)
 
 The
-[next implementation](https://share.sourceacademy.org/qcpjq)
+[next implementation](https://share.sourceacademy.org/9ufgt)
 introduces functions without the need for for
 return statements. For example, the function `fact` in this language
 ``` js
@@ -690,7 +690,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final implementation](https://share.sourceacademy.org/o40jf)
+The [final implementation](https://share.sourceacademy.org/l1vxj)
 handles return statements, a prominent feature in languages like C, Java, Python, and
 JavaScript. Returns statements allow the programmer to return from a function from anywhere in its
 body. Whatever statements in the body that remain to be evaluated are ignored.
