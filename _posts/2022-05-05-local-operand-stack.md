@@ -19,7 +19,9 @@ is to allocate a new operand stack for each function invocation. This design mak
 easy for the implementers of high-performance virtual machines to use real machine registers
 and real machine instructions in place of an operand stack and stack-based instructions.
 In this blog post, I show the (few) changes needed, to migrate from a global operand stack
-to a local operand stack.
+to a local operand stack. Feel free to play with the compiler and the
+[SECD-style machine with local operand stacks](https://share.sourceacademy.org/0j06r) before,
+during, or after reading this post.
 
 ## Baseline: A global operand stack
 
