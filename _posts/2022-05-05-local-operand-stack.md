@@ -7,7 +7,7 @@ tags: SICP-JS
 ## Motivation
 
 In the post
-[An Explicit-control Evaluator in Stages](https://martin-henz.github.io/martin-henz/2022/04/20/vm-in-stages.html),
+[A Virtual-machine-based Implementation in Stages](https://martin-henz.github.io/martin-henz/2022/04/20/vm-in-stages.html),
 I gave a virtual machine for a sublanguage of JavaScript. It separated compilation from execution
 using an array of virtual machine instructions. The virtual machine used as global registers a
 program counter (index in the instruction array), environment, a runtime stack, and
@@ -23,7 +23,7 @@ to a local operand stack.
 
 ## Baseline: A global operand stack
 
-Recall that the `run` function keeps four registers:
+Recall that the `run` function keeps four registers: `operands`, `pc`, `environment`, and `runtime_stack`.
 ``` js
 function run(instrs) {
     let operands = null;
@@ -76,7 +76,8 @@ The purpose of the call instruction is to get the machine ready for executing
 the body of the callee function. Note that the callee function uses the
 current operand stack (after popping the arguments and the callee function
 itself). The global operand stack will grow and shrink as a result of the nesting
-depth of function arguments. In this design, the caller saves the machine
+depth of function arguments and their position.
+The caller saves the machine
 registers `pc` and `environment` on the runtime stack before getting these
 registers ready for the callee.
 
@@ -111,7 +112,9 @@ are needed any longer. The corresponding clause in the machine is as follows.
 ```
 Finally, the return instruction in a machine with a global operand stack
 restores the registers `pc` and `environment` from the call
-frame that was most recently saved on the runtime stack.
+frame that was most recently saved on the runtime stack. The return
+value is already in the right place, namely on top of the global operand
+where the caller expects it.
 ``` js
         } else if (is_return_instruction(instr)) {
             if (is_runtime_stack_call_frame(head(runtime_stack))) {
@@ -124,7 +127,7 @@ frame that was most recently saved on the runtime stack.
             runtime_stack = tail(runtime_stack);
         } else ...
 ```
-In this post, it is safe to ignore block frames, which are beside call frames
+In this post, it is safe to ignore block frames, which are (beside call frames)
 the second kind of frames introduced in the machine. Call frames are
 created and accessed with the following functions.
 ``` js
@@ -147,7 +150,7 @@ function runtime_stack_call_frame_environment(sf) {
 Making the operand stack local to each evaluation of a function body requires that the
 function call instruction needs to save the current operand stack (after popping
 the arguments and the callee) in the call frame,
-along with `pc` and `environment. After that, it it can just set `operand` to `null`.
+along with `pc` and `environment`. After that, it it can just set `operand` to `null`.
 ``` js
         } else if (is_call_instruction(instr)) {
             const arity = call_instruction_arity(instr);
@@ -198,13 +201,37 @@ function runtime_stack_call_frame_operands(sf) {
 ```
 The only change in the tail call instruction is that `operands` is set to `null`.
 The current operand stack is not needed any longer and therefore is not saved.
-
-The final change concerns return instructions. In version with a global
+``` js
+        } else if (is_tail_call_instruction(instr)) {
+            const arity = call_instruction_arity(instr);
+            const args = take(operands, arity);
+            const callee_and_remaining_operands = drop(operands, arity);
+            const callee = head(callee_and_remaining_operands);
+            const remaining_operands = tail(callee_and_remaining_operands);
+            if (is_primitive_function(callee)) {
+                pc = pc + 1;
+                operands = pair(apply_in_underlying_javascript(
+                                    primitive_implementation(callee),
+                                    args),
+                                remaining_operands);
+            } else {
+                // don't push on runtime stack here
+                const new_environment = extend_environment(
+                                            function_parameters(callee),
+                                            args,
+                                            function_environment(callee));
+                operands = null;
+                environment = new_environment;
+                pc = function_address(callee);
+            }
+        } else if ...
+```
+The final change concerns return instructions. In the version with a global
 operand stack, the result of evaluating the return expression was already
 in the right place, namely on top of the global operand stack. When the
 operand stack is local to each evaluation of a function body, the return
 value needs to be transferred from the callee's operand stack to the caller's
-operand stack:
+operand stack.
 ``` js
         } else if (is_return_instruction(instr)) {
             if (is_runtime_stack_call_frame(head(runtime_stack))) {
