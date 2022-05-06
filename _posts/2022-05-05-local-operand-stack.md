@@ -145,7 +145,7 @@ function runtime_stack_call_frame_environment(sf) {
 }
 ```
 
-## Making the operand stack global
+## Making the operand stack local
 
 Making the operand stack local to each evaluation of a function body requires that the
 function call instruction needs to save the current operand stack (after popping
