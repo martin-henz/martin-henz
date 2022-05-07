@@ -488,9 +488,3 @@ explicit *heap* data structure, which can be an array that only holds primitive
 values. If the machine runs out of memory, garbage collection can free
 unused memory in this heap. But before that, I need to simplify the
 representation of environment frames. Stay tuned.
-
-
-
-https://share.sourceacademy.org/n7nc4
-
-https://share.sourceacademy.org/0j06r
