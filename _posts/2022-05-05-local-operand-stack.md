@@ -259,18 +259,17 @@ operand stack.
 ## A memory allocation issue
 
 My ambition of this series of posts is to build a virtual machine for a JavaScript
-sublanguage that lets me control all memory allocation. All required memory will be allocated
-from a *heap* data structure, and apart from this heap which will be an array of primitive
-values, no JavaScript data structures are allocated at runtime. The problem that arises
+sublanguage that lets me control all memory allocation. New memory will be allocated
+from a *heap* data structure. The problem that arises
 when operand stacks are local is that the machine needs to reserve an area on the heap when
 it allocates a new operand stack. How many values does the new operand stack need to
-accommodate? 
+accommodate during the evaluation of the body of the callee function?
 In general, it is not possible to predict exactly how many values an operand
 stack needs to hold. As often in computer science, I must be satisfied with a safe upper bound.
 
 ## The solution
 
-The compiler of [second and final implementation in this post](https://share.sourceacademy.org/n7nc4)
+The compiler of [the second and final implementation in this post](https://share.sourceacademy.org/n7nc4)
 computes such a safe upper
 bound and its machine makes use of it at runtime.
 
@@ -367,7 +366,6 @@ operations on the operand stack, to push a value to an operand stack, pop
 a value from an operand stack, and to inspect the current top item on an
 operand stack.
 ``` js
-// operands stacks
 function list_set(xs, n, x) {
     if (n === 0) {
         set_head(xs, x);
@@ -434,9 +432,7 @@ function run(instrs) {
     let environment = the_global_environment;
     let runtime_stack = null;
     while (! is_done_instruction(instrs[pc])) {
-//        print_list(operands, "\noperands:                          ");
         const instr = instrs[pc];
-//        print_code([instr]);
         if (is_load_constant_instruction(instr)) {
             pc = pc + 1;
             push_on_operand_stack(load_constant_value(instr), operands);
@@ -491,4 +487,5 @@ constructed with the `pair` function of the SICP package), I can allocate
 environment frames, runtime stack frames, and function values in an
 explicit *heap* data structure, which can be an array that only holds primitive
 values. If the machine runs out of memory, garbage collection can free
-unused memory in this heap. Stay tuned.
+unused memory in this heap. But before that, I need to simplify the
+representation of environment frames. Stay tuned.
