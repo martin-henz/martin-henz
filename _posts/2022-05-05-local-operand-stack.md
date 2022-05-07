@@ -153,7 +153,7 @@ function runtime_stack_call_frame_environment(sf) {
 
 I start with making the operand stack local to each evaluation of a function body.
 Feel free to play with 
-[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/0j06r).
+[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/53g2u).
 When the operand stack is local to each evaluation of a function body,
 the call instruction needs to save the current operand stack (after popping
 the arguments and the callee) in the call frame,
@@ -269,9 +269,8 @@ stack needs to hold. As often in computer science, I must be satisfied with a sa
 
 ## The solution
 
-The compiler of [the second and final implementation in this post](https://share.sourceacademy.org/n7nc4)
-computes such a safe upper
-bound and its machine makes use of it at runtime.
+The compiler of [the second and final implementation in this post](https://share.sourceacademy.org/sdv5m)
+computes such a safe upper bound and its machine makes use of it at runtime.
 
 For each load function instruction, the compiler calculates the upper bound and saves it in the
 instruction. 
