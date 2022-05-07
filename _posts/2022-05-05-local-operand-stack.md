@@ -480,11 +480,13 @@ the new machine.
 
 ## The road ahead
 
-With a local operand stack in place, I can make the virtual machine more
-realistic. Instead of relying on JavaScript's data structures (here pairs
-constructed with the `pair` function of the SICP package), I can allocate
-environment frames, runtime stack frames, and function values in an
-explicit *heap* data structure, which can be an array that only holds primitive
-values. If the machine runs out of memory, garbage collection can free
-unused memory in this heap. But before that, I need to simplify the
-representation of environment frames. Stay tuned.
+With a local operand stack in place, I can make the virtual machine
+more realistic. Instead of relying on JavaScript’s data structures
+(here pairs constructed with the `pair` function of the SICP package), I
+can allocate environment frames, runtime stack frames, and function
+values in an explicit heap data structure, which can be an array that
+only holds primitive values. If the machine runs out of memory,
+garbage collection can free unused memory in this heap. But before
+that, I need to simplify the representation of environment
+frames. Stay tuned.
+
