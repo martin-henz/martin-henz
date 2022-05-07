@@ -153,7 +153,7 @@ function runtime_stack_call_frame_environment(sf) {
 
 I start with making the operand stack local to each evaluation of a function body.
 Feel free to play with 
-[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/o40jf).
+[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/0j06r).
 When the operand stack is local to each evaluation of a function body,
 the call instruction needs to save the current operand stack (after popping
 the arguments and the callee) in the call frame,
@@ -489,3 +489,9 @@ explicit *heap* data structure, which can be an array that only holds primitive
 values. If the machine runs out of memory, garbage collection can free
 unused memory in this heap. But before that, I need to simplify the
 representation of environment frames. Stay tuned.
+
+
+
+https://share.sourceacademy.org/n7nc4
+
+https://share.sourceacademy.org/0j06r
