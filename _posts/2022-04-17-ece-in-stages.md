@@ -231,8 +231,8 @@ to the continuation.
       } else ...
 ```
 The function `prepend_statements` compiles the sequence into the continuation such
-that they are separated by pop instructions (here using an imperative while
-loop to emphasize the iterative nature of the evaluator).
+that the statements of the sequence are separated by pop instructions (here using an
+imperative while loop to emphasize the iterative nature of the evaluator).
 ``` js
 function prepend_statements(statements, continuation) {
     if (is_null(statements)) {
@@ -408,7 +408,7 @@ const y = 4;
     x * 2;
 }`);
 ```
-yields the expected value 3.
+yields the expected value 22.
 
 ### Adding functions (with implicit return)
 
@@ -773,11 +773,9 @@ function fact(n) {
     return fact_iter(n, 1, 1);
 }
 function fact_iter(n, i, acc) {
-    if (i > n) {
-        return acc;
-    } else {
-        return fact_iter(n, i + 1, acc * i);
-    }
+    return i > n
+           ? acc
+           : fact_iter(n, i + 1, acc * i);
 }
 fact(5);
 `);
@@ -807,9 +805,13 @@ function return_cond_expr_to_cond_stmt(stmt) {
                make_return_statement(conditional_alternative(cond_expr)));
 }
 ```
-This evaluator makes control explicit by keeping tack of continuations. To do so,
+This evaluator makes control explicit by keeping track of continuations. To do so,
 it translates complex expressions such as function applications into sequences
 of instructions. The next post will take this idea further, by *compiling* the
 entire program into a sequence of instruction, thereby cleanly separating
 compilation of a program from execution of the *machine code* that
 results from the compilation.
+
+### Acknowledgements
+
+Thanks to Julie Sussman for pointing out several inaccuracies and typos.
