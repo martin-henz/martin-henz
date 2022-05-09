@@ -477,6 +477,16 @@ the new machine.
             }
         } else if ...
 ```
+The function `pop_arguments_from_operand_stack` makes a list
+by successively popping values from the operand stack.
+``` js
+function pop_arguments_from_operand_stack(operand_stack, n) {
+    return n === 0
+           ? null 
+           : pair(pop_from_operand_stack(operand_stack),
+                  pop_arguments_from_operand_stack(operand_stack, n - 1));
+}
+```
 
 ## The road ahead
 
