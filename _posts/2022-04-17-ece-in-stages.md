@@ -518,6 +518,12 @@ The new environment with respect to which the body is evaluated is the result
 of extending the function's environment with a binding of the parameters (taken from
 the function value) to the arguments (taken from the operand stack), both in reverse order.
 
+This evaluator is "iterative" in the sense that it runs in a simple loop of the
+interpreting program. However, every function call wraps the current continuation
+into a thunk to save the current environment, which consumes memory.
+The next evaluator distinguishes *tail calls*, for whose evaluation no memory
+is needed and thereby achieves constant space consumption for iterative processes.
+
 In order to provide bindings for predeclared names, the function `parse_and_evaluate`
 uses `the_global_environment` from the previous post as its initial environment.
 ``` js
@@ -666,11 +672,13 @@ In contrast with the recursive evaluator, this explicit control evaluator
 does not need to handle any special "return values" during the evaluation of function bodies.
 The evaluation of sequences and function application remains unaffected by return statements.
 
-However, the evaluator as presented so far will exhibit non-constant space consumption
-even if the interpreted function should give rise to an iterative process because the evaluation
-of every call instruction pushes a new frame onto the runtime stack. If the call
+Like the previous evaluator, this evaluator as presented so far will exhibit non-constant
+space consumption even if the interpreted function should give rise to an iterative process.
+The previous evaluator pushed a new thunk on the continuation for each function call,
+and this evaluator pushes a new frame onto the runtime stack for each function call.
+If the call
 instruction is the last instruction that belongs to the body of the function, we say it is
-a *tail call". In that case, there is no need for pushing a runtime stack frame. Instead the 
+a *tail call*. In that case, there is no need for pushing a runtime stack frame. Instead the
 callee function can return to the
 place that called the function in which the tail call occurred. The evaluator can identify
 tail calls during evaluation using following clause placed in front of the clause
@@ -815,3 +823,6 @@ results from the compilation.
 ### Thanks
 
 Thanks to Julie Sussman for pointing out several inaccuracies and typos.
+Thanks to Jerry Sussman for requesting to clarify the way these
+evaluators treat (tail) recursion.
+
