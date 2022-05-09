@@ -812,6 +812,6 @@ entire program into a sequence of instruction, thereby cleanly separating
 compilation of a program from execution of the *machine code* that
 results from the compilation.
 
-### Acknowledgements
+### Thanks
 
 Thanks to Julie Sussman for pointing out several inaccuracies and typos.
