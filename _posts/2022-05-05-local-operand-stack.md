@@ -2,7 +2,7 @@
 tags: SICP-JS
 ---
 
-# Making the Operand Stack Local
+# Making Operand Stacks Local
 
 ## Motivation
 
@@ -149,12 +149,12 @@ function runtime_stack_call_frame_environment(sf) {
 }
 ```
 
-## Making the operand stack local
+## Making operand stacks local
 
-I start with making the operand stack local to each evaluation of a function body.
+I start with making operand stacks local to each evaluation of a function body.
 Feel free to play with 
 [the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/53g2u).
-When the operand stack is local to each evaluation of a function body,
+When operand stacks are local to each evaluation of a function body,
 the call instruction needs to save the current operand stack (after popping
 the arguments and the callee) in the call frame,
 along with `pc` and `environment`. After that, it it can just set `operand` to `null`.
@@ -235,8 +235,8 @@ The current operand stack is not needed any longer and therefore is not saved.
 ```
 Return instructions need to change as follows. In the version with a global
 operand stack, the result of evaluating the return expression was already
-in the right place, namely on top of the global operand stack. When the
-operand stack is local to each evaluation of a function body, the return
+in the right place, namely on top of the global operand stack. When
+operand stacks are local to each evaluation of a function body, the return
 value needs to be transferred from the callee's operand stack to the caller's
 operand stack.
 ``` js
@@ -480,7 +480,7 @@ the new machine.
 
 ## The road ahead
 
-With a local operand stack in place, I can make the virtual machine
+With local operand stacks in place, I can make the virtual machine
 more realistic. Instead of relying on JavaScript’s data structures
 (here pairs constructed with the `pair` function of the SICP package), I
 can allocate environment frames, runtime stack frames, and function
