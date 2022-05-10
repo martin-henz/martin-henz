@@ -13,7 +13,7 @@ of JavaScript in a step-by-step fashion.
 The result mixes compilation steps that manage control using a list of instructions
 that I called *continuation* with execution steps where previously compiled instructions
 are executed with the help of an environment, an operand stack, and a runtime stack.
-Compilation was done on-the-fly, and function bodies needed to be recompiled, each time
+Compilation was done on the fly, and function bodies needed to be recompiled, each time
 they were executed. This post fixes this by cleanly separating a compiler from a
 machine. The compiler compiles the given program by writing instructions into an array
 without executing them, and the machine executes these instructions without ever referring
@@ -52,7 +52,7 @@ explicit-control evaluator described in
 consisted in a function `evaluate` that mixed compilation with execution. The values
 of literals were pushed on an *operand stack*.
 Binary operator
-combinations were compiled on-the-fly to instructions, and instructions were executed
+combinations were compiled on the fly to instructions, and instructions were executed
 by applying the correct operations to the operands, taken from the operand stack.
 ``` js
 function evaluate(program) {
