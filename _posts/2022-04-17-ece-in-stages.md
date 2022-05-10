@@ -158,10 +158,10 @@ language in the previous post), and pushes the result back on the operand stack.
         } else ...
 ```
 You can look at this approach of evaluating binary operator combinations
-as a *compilation* step performed on-the-fly: A binary operator combination is
+as a *compilation* step performed on the fly: A binary operator combination is
 evaluated by "compiling" it into a binary operator instruction that is stored in
 the continuation, behind the operand expressions. Another way to look at it is
-that the given expression is translated on-the-fly into postfix notation.
+that the given expression is translated on the fly into postfix notation.
 
 In this post, we use `parse_and_evaluate` functions that look like the corresponding
 functions in the previous post, but that use the `evaluate` functions of this post.

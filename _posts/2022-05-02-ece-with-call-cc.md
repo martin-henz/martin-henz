@@ -11,7 +11,7 @@ In the post
 control is made explicit by a continuation data structure. The continuation explicitly
 keeps track of the components that need to be evaluated after the current component
 is dealt with. The evaluator compiles complex components such as conditionals and
-applications on-the-fly into sequences of smaller components in the continuation.
+applications on the fly into sequences of smaller components in the continuation.
 Components can push and pop from an operand stack, and a runtime stack allows return
 statments to pass control back to caller of the currently executing function.
 
