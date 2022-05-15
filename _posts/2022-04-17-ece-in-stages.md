@@ -24,9 +24,9 @@ this interpreter. To avoid recursion, I make control explicit by
 storing the expressions and statements that need to be evaluated as *continuations*, by
 using an explicit *operand stack*, and 
 by augmenting the language with *instructions* that operate on this operand stack.
-To achieve
-iterative processes, the evaluator figures out at runtime, which function calls are
-*tail-recursive* and takes adequate action. As in the previous post, I proceed in stages
+The evaluator is naturally tail-recursive, because it only saves continuations and
+environments if they are needed after function calls.
+As in the previous post, I proceed in stages
 to gently introduce the features of evaluators for increasingly powerful sublanguages of
 JavaScript.
 
