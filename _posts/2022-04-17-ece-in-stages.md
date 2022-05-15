@@ -802,7 +802,7 @@ results from the compilation.
 ## Thanks
 
 Thanks to Julie Sussman for pointing out several inaccuracies and typos.
-Thanks to Jerry Sussman for guiding me towards evaluators that are
+Thanks to Jerry Sussman for guiding me patiently towards evaluators that are
 naturally tail-recursive.
 
 
