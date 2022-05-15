@@ -588,8 +588,9 @@ caller, ignoring the subsequent expression statements `44;` and `66;` that would
 remain to be evaluated in the body.
 
 The difficulty with evaluating explicit return statements is that evaluation needs to abandon the
-remaining statements of the function, regardless how many nested block statements surround
-the return statement. The `evaluate` function cannot rely on the continuation to find the place
+remaining statements of the function, regardless whether any block statements surround
+the return statement or whether any statements follow the returns statement in a statement sequence.
+The `evaluate` function cannot rely on the continuation to find the place
 where evaluation should resume after evaluating a return statement.
 Instead, a new variable called `runtime_stack` keeps track of the
 continuation after returning from a function call and the environment
@@ -615,8 +616,8 @@ function evaluate(program) {
     return head(operands);
 } 
 ```
-I will explain below why 
-the initial stack frame has an empty continuation and an empty environment.
+I will explain below why the runtime stack initially contains
+a stack frame that has an empty continuation and an empty environment.
 
 Runtime stack frames are tagged lists, as usual.
 ``` js
@@ -694,12 +695,12 @@ function needs_current_continuation(components) {
            ! is_restore_continuation_instruction(head(components));
 }
 ```
-I can now explain, why there is an initial frame on the runtime stack before
+I can now explain why there is an initial frame on the runtime stack before
 the evaluation loop starts. The reason is that if the last statement of the
-program is a call of a tail-recursive function, the return statement of that
-function will pop a frame from the runtime stack without the call having pushed
-any frame. Starting with an initial frame on the runtime stack takes care of this
-situation.
+program is a call of a tail-recursive function, the last restore-continuation
+instruction will pop a frame from the runtime stack without the initial call
+having pushed any frame. Starting with an initial frame on the runtime stack takes
+care of this situation.
 
 In JavaScript, the value `undefined` is returned if the evaluation of the function body
 does not encounter any return statements. The following modification in the evaluation
@@ -749,8 +750,9 @@ space consumption when evaluating applications of this `factorial` function. The
 space consumption comes from runtime stack frames that are pushed on the runtime
 stack for every function call.
 
-The following evaluation has constant space consumption because a tail call instruction
-is used instead of a call instruction.
+The following evaluation has constant space consumption because the recursive
+call of `fact_iter` detects that the next instruction is a restore-continuation
+instruction and avoids pushing a new frame on the runtime stack.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -766,9 +768,9 @@ function fact_iter(n, i, acc) {
 fact(5);
 `);
 ```
-However, if you choose to use conditional expressions rather than conditional statements,
-the clause above does not get used and a call instruction is used instead of a
-tail call instruction, which results in non-constant space consumption.
+If you choose to use conditional expressions rather than conditional statements,
+the recursive call of `fact_iter` still detects that the next instruction is
+a restore-continuation instruction.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -782,31 +784,14 @@ function fact_iter(n, i, acc) {
 fact(5);
 `);
 ```
-The following clause, inserted in front of the handling of return statements,
-takes care of this case.
-``` js
-        } else if (is_return_statement(component) &&
-                   is_conditional(return_expression(component))) {
-            // for tail recursion, transform 
-            //   return .?.:. into 
-            //   if (.) { return .; } else { return .; }
-            components = pair(return_cond_expr_to_cond_stmt(component), 
-                              continuation);
-        } else if (is_return_statement(component)) {
-            components = list(return_expression(component),
-                              make_return_instruction());
-```
-It translates conditional expressions in return statements into conditional
-statements using the function `return_cond_expr_to_cond_stmt`.
-``` js
-function return_cond_expr_to_cond_stmt(stmt) {
-    const cond_expr = return_expression(stmt);
-    return make_conditional_statement(
-               conditional_predicate(cond_expr),
-               make_return_statement(conditional_consequent(cond_expr)),
-               make_return_statement(conditional_alternative(cond_expr)));
-}
-```
+The reason for this is that by the time
+the call instruction gets evaluated, the branch instruction from the surrounding
+conditional expression has been handled already. The next instruction after the
+call instruction is a restore-continuation instruction as in the previous
+version of the program.
+
+## Outlook
+
 This evaluator makes control explicit by keeping track of continuations. To do so,
 it translates complex expressions such as function applications into sequences
 of instructions. The next post will take this idea further, by *compiling* the
