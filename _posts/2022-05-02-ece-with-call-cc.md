@@ -4,6 +4,8 @@ tags: SICP-JS
 
 # Call-with-current-continuation in an Explicit Control Evaluator for JavaScript
 
+*revised on May 20, 2022*
+
 ## Motivation
 
 In the post
@@ -13,11 +15,11 @@ keeps track of the components that need to be evaluated after the current compon
 is dealt with. The evaluator compiles complex components such as conditionals and
 applications on the fly into sequences of smaller components in the continuation.
 Components can push and pop from an operand stack, and a runtime stack allows return
-statments to pass control back to caller of the currently executing function.
+statements to pass control back to caller of the currently executing function.
 
 In this post, I show how this explicit-control evaluator can be modified to handle
 call-with-current-continuation, a powerful construct available in Scheme. The
-[resulting call-cc-enabled evaluator](https://share.sourceacademy.org/kqo1j) includes
+[resulting call-cc-enabled evaluator](https://share.sourceacademy.org/xcje4) includes
 the implementation and examples given below.
 
 
@@ -83,16 +85,16 @@ evaluator handles the case where the function being applied is a primitive funct
             const args = take(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
-            const remaining_operands = tail(callee_and_remaining_operands);
+            operands = tail(callee_and_remaining_operands);
             if (is_primitive_function(callee)) {
                 components = continuation;
                 operands = pair(apply_in_underlying_javascript(
                                     primitive_implementation(callee),
                                     args),
-                                remaining_operands);
+                                operands);
             } else {
                 ...
-            }
+            } 
 	} else ...
 ```
 In this calling convention, the primitive implementation does not get a chance
@@ -107,7 +109,7 @@ new evaluator, I sightly change the calling convention:
             const args = take(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
-            const remaining_operands = tail(callee_and_remaining_operands);
+            operands = tail(callee_and_remaining_operands);
             if (is_primitive_function(callee)) {
                 operands = pair(undefined, // dummy
                                 drop(operands, arity + 1));
