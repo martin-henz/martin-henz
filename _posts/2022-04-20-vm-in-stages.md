@@ -350,7 +350,8 @@ instructions to mark the beginning and end of each block.
         } else ...
 ```
 Whereas the explicit-control evaluator used the continuation to keep track
-of the environment with thunks, I decided to use *block frames* on a
+of the environment when needed, using restore-environment instructions,
+I decided to use *block frames* on a
 *runtime stack* for this purpose. Thus the machine has two new registers,
 `environment` and `runtime_stack`.
 ``` js
