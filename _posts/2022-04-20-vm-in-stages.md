@@ -481,10 +481,10 @@ const y = 4;
 ```
 yields the expected value 3.
 
-### Adding functions (with implicit return)
+## Adding functions (with implicit return)
 
 The
-[next implementation](https://share.sourceacademy.org/9ufgt)
+[next implementation](https://share.sourceacademy.org/72nhu)
 introduces functions without the need for for
 return statements. For example, the function `fact` in this language
 ``` js
@@ -513,7 +513,7 @@ it before the function is being called.
         // clause for lambda expressions in compiler
         } else if (is_lambda_expression(comp)) {
             instrs[wc] = load_function(
-                             reverse(lambda_parameter_symbols(comp)),
+                             lambda_parameter_symbols(comp),
                              wc + 2);
             wc = wc + 1;
             // jump over the body of the lambda expression
@@ -577,15 +577,20 @@ it is executed. The instruction remembers the number of arguments.
             wc = wc + 1;
 	} else ...
 ```
-The execution of the call instruction pops as many arguments
-from the operand stack as indicated by the instruction, and
-then finds the callee function
-as the next value on the operand stack.
+The execution of the call instruction takes as many arguments
+from the operand stack as indicated by the arity given in the
+instruction, and then finds the callee function
+as the next value on the operand stack. The arguments appear
+on the operand stack in reverse order because they are pushed 
+by the machine as the results of evaluating the argument expressions.
+The simple, tail-recursive function `take_reverse` takes the required
+arguments from the operand stack and returns them in a list in
+the original order of the argument expressions.
 ``` js
         // clause for call instruction in machine
         } else if (is_call_instruction(instr)) {
             const arity = call_instruction_arity(instr);
-            const args = take(operands, arity);
+            const args = take_reverse(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
             const remaining_operands = tail(callee_and_remaining_operands);
@@ -691,7 +696,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final implementation](https://share.sourceacademy.org/l1vxj)
+The [final implementation](https://share.sourceacademy.org/01yr1)
 handles return statements, a prominent feature in languages like C, Java, Python, and
 JavaScript. Returns statements allow the programmer to return from a function from anywhere in its
 body. Whatever statements in the body that remain to be evaluated are ignored.
@@ -778,7 +783,7 @@ except that it doesn't push any call frame on the runtime stack.
         // clause for tail_call instructions in machine
         } else if (is_tail_call_instruction(instr)) {
             const arity = call_instruction_arity(instr);
-            const args = take(operands, arity);
+            const args = take_reverse(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
             const remaining_operands = tail(callee_and_remaining_operands);
