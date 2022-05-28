@@ -4,6 +4,8 @@ tags: SICP-JS
 
 # A Virtual-machine-based Implementation in Stages
 
+*revised on May 28, 2022*
+
 ## Motivation
 
 In
