@@ -153,7 +153,7 @@ function runtime_stack_call_frame_environment(sf) {
 
 I start with making operand stacks local to each evaluation of a function body.
 Feel free to play with 
-[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/53g2u).
+[the compiler and the SECD-style machine with local operand stacks](https://share.sourceacademy.org/oam2b).
 When operand stacks are local to each evaluation of a function body,
 the call instruction needs to save the current operand stack (after popping
 the arguments and the callee) in the call frame,
@@ -161,7 +161,7 @@ along with `pc` and `environment`. After that, it it can just set `operand` to `
 ``` js
         } else if (is_call_instruction(instr)) {
             const arity = call_instruction_arity(instr);
-            const args = take(operands, arity);
+            const args = take_reverse(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
             const remaining_operands = tail(callee_and_remaining_operands);
@@ -211,7 +211,7 @@ The current operand stack is not needed any longer and therefore is not saved.
 ``` js
         } else if (is_tail_call_instruction(instr)) {
             const arity = call_instruction_arity(instr);
-            const args = take(operands, arity);
+            const args = take_reverse(operands, arity);
             const callee_and_remaining_operands = drop(operands, arity);
             const callee = head(callee_and_remaining_operands);
             const remaining_operands = tail(callee_and_remaining_operands);
@@ -279,7 +279,7 @@ instruction.
         } else if (is_lambda_expression(comp)) {
             const body = lambda_body(comp);
             instrs[wc] = load_function(
-                             reverse(lambda_parameter_symbols(comp)),
+                             lambda_parameter_symbols(comp),
                              wc + 2,
                              max_stack_size(body));
             ...
