@@ -269,7 +269,7 @@ stack needs to hold. As often in computer science, I must be satisfied with a sa
 
 ## The solution
 
-The compiler of [the second and final implementation in this post](https://share.sourceacademy.org/sdv5m)
+The compiler of [the second and final implementation in this post](https://share.sourceacademy.org/0s8ga)
 computes such a safe upper bound and its machine makes use of it at runtime.
 
 For each load function instruction, the compiler calculates the upper bound and saves it in the
