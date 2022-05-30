@@ -14,7 +14,7 @@ by making the operand stack explicit to get operand stacks ready for a realistic
 memory management in the virtual machine. In this post, I similarly
 prepare *environments* for
 realistic memory management. For this, I simplify the representation of environment frames
-such that they become just list of values accessed with position numbers
+such that they become just list of values accessed with frame and position numbers
 instead of lookup tables accessed with the symbols of names. This removes the need for
 linearly searching environment frames to find the value of a name using a
 technique that is explained in detail in
@@ -22,9 +22,8 @@ technique that is explained in detail in
 In this post I apply this technique to the virtual machine of the previous
 post. I first show how the machine makes use of this information for efficient
 environment lookup and assignment.
-Then, I show how the compiler can keep track of the
-environment position in which the values of names will be found at runtime.
-Then, 
+Then, I show how the compiler predict the address
+in which the values of names will be found in the environment at runtime.
 But first let me review the way environments
 are represented in the previous machines.
 
@@ -156,7 +155,7 @@ is also unsuccessful, and thus it proceeds to the the third symbol
 list `list("x", "y")` where it finds `"x"` in position 0, and thus
 returns the corresponding value, here denoted by `v_8`. This behavior
 can be predicted by examining the expression in which `x` occurs.
-When looking for dedeclaration of `x` starting from `x * y * z`, you
+When looking for a declaration of `x` starting from `x * y * z`, you
 need to skip two surrounding lambda expression, before you find the
 declaration at position 0 in the parameters of `(x, y) => ...`.
 
@@ -217,7 +216,7 @@ function enter_scope_lexical_declarations(instr) {
 ```
 The `load_function` instruction is replaced by a
 `load_function_lexical` instruction that carries
-the number of parameters instead of their symbols.
+the number of parameters (arity) instead of their symbols.
 ``` js
 function load_function_lexical(arity, address, stack_limit) {
     return list("load_function_lexical", arity, address, stack_limit);
