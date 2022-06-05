@@ -4,6 +4,15 @@ tags: SICP-JS
 
 # Metalinguistic Abstraction in Stages
 
+## In a nutshell
+
+This post describes four implementations of recursive evaluators. To play with them, click the links:
+* [Calculator language](https://share.sourceacademy.org/2bjj9)
+* [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/1rsj3)
+* [Adding blocks, declarations, and names](https://share.sourceacademy.org/rhl4t)
+* [Adding functions with implicit return](https://share.sourceacademy.org/ui2bk)
+* [Adding return statements](https://share.sourceacademy.org/fadhu)
+
 ## Motivation
 
 The textbook

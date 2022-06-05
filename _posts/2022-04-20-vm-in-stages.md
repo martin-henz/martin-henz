@@ -6,6 +6,15 @@ tags: SICP-JS
 
 *revised on May 28, 2022*
 
+## In a nutshell
+
+This post describes four implementations of machine and compiler. To play with them, click the links:
+* [Calculator language](https://share.sourceacademy.org/u20x4)
+* [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/6sesc)
+* [Adding blocks, declarations, and names](https://share.sourceacademy.org/jcs26)
+* [Adding functions with implicit return](https://share.sourceacademy.org/72nhu)
+* [Adding return statements](https://share.sourceacademy.org/01yr1)
+
 ## Motivation
 
 In

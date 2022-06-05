@@ -4,6 +4,14 @@ tags: SICP-JS
 
 # A Virtual Machine with Lexical Addressing
 
+*revised on June 4, 2022*
+
+## In a nutshell
+
+This post describes two implementations of machine and compiler. To play with them, click the links:
+* [Lexical addressing with frames as lists](https://share.sourceacademy.org/ry9xw)
+* [Lexical addressing with frames as arrays](https://share.sourceacademy.org/r3t7v)
+
 ## Motivation
 
 The
@@ -20,10 +28,12 @@ linearly searching environment frames to find the value of a name using a
 technique that is explained in detail in
 [Section 5.5.6 of SICP JS](https://sourceacademy.org/sicpjs/5.5.6).
 In this post I apply this technique to the virtual machine of the previous
-post. I first show how the machine makes use of this information for efficient
-environment lookup and assignment.
+post. I first show how the machine makes use of this information for 
+environment lookup and assignment, by implementing environment frames as lists of values.
 Then, I show how the compiler predict the address
 in which the values of names will be found in the environment at runtime.
+As a final step, I change the respresentation of frames from lists to arrays
+to ensure constant time access.
 But first let me review the way environments
 are represented in the previous machines.
 
@@ -130,8 +140,14 @@ environment successively to find the given name and its corresponding value.
 a technique to optimize name lookup such that the compiler predicts the
 position where the value can be found. This is possible because in
 lexical scoping, the structure of the environment exactly matches the
-structure of nested scopes. The following example, taken from SICP 5.5.6,
-illustrates the idea.
+structure of nested scopes. Similar to the previous post, I proceed in two
+steps: First I present
+[an implementation](https://share.sourceacademy.org/ry9xw) that retains the list structure
+of environments, and then I show how arrays can be used to further speed
+up environment lookup and prepare our machine for heap allocation.
+
+The following example, taken from SICP 5.5.6,
+illustrates the idea of lexical addressing.
 ``` js
 ((x, y) =>
    (a, b, c, d, e) =>
@@ -449,6 +465,45 @@ new names each time the compiler enters a local scope.
             wc = wc + 1;
             set_jump_address(goto_instruction, wc);
         } else ...	
+```
+
+## Frames as Arrays
+
+The representation of frames as lists of values means that access is still linear
+even when the index is know at compile time. The
+[final version](https://share.sourceacademy.org/r3t7v) of the machine
+uses arrays instead of lists to fix
+this. Here is the new implementation of environments that provides constant
+time access to frames.
+``` js
+function make_frame(frame_size) {
+    return list("frame", [], frame_size);
+}
+function frame_array(frame) {
+    return head(tail(frame));
+}
+function extend_environment(vals, base_env) {
+    const len = length(vals);
+    const frame = make_frame(len);
+    const a = frame_array(frame);
+    for (let i = 0; i < len; i = i + 1) {
+        a[i] = head(vals);
+        vals = tail(vals);
+    }
+    return pair(frame, base_env);
+}
+function find_frame(env, frame) {
+    return frame === 0
+           ? first_frame(env)
+           : find_frame(enclosing_environment(env), frame - 1);
+}
+function lexical_address_lookup(frame, position, env) {
+    return frame_array(find_frame(env, frame))[position];
+}
+function lexical_address_assign(frame, position, val, env) {
+    frame_array(find_frame(env, frame))[position] = val;
+    return env;
+}
 ```
 
 ## The road ahead

@@ -6,6 +6,15 @@ tags: SICP-JS
 
 *revised on May 15, 2022*
 
+## In a nutshell
+
+This post describes four implementations of explicit control evaluators. To play with them, click the links:
+* [Calculator language](https://share.sourceacademy.org/5eoge)
+* [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/jqlpy)
+* [Adding blocks, declarations, and names](https://share.sourceacademy.org/z9hhe)
+* [Adding functions with implicit return](https://share.sourceacademy.org/9waeh)
+* [Adding return statements](https://share.sourceacademy.org/7mg4m)
+
 ## Motivation
 
 In
