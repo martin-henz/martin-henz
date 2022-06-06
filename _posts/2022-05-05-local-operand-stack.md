@@ -2,13 +2,13 @@
 tags: SICP-JS
 ---
 
+# Making Operand Stacks Local
+
 ## In a nutshell
 
 This post describes two implementations of machine and compiler. To play with them, click the links:
 * [Local operand stacks](https://share.sourceacademy.org/oam2b)
 * [Local operand stacks of bounded size](https://share.sourceacademy.org/0s8ga)
-
-# Making Operand Stacks Local
 
 ## Motivation
 
