@@ -7,36 +7,40 @@ tags: SDF
 Section 2.1 of the book
 [Software Design for Flexibility](https://mitpress.mit.edu/books/software-design-flexibility)
 (SDF)
-introduces a system of function combinators that allows a programmer 
+introduces function combinators that allow a programmer 
 to describe basic functional components and *combine*
 them in order build a more complex system. The presented combinators compose
-functions, rearrange their arguments and curry them, and thus they let the
-programmer to mix-and-match the basic components. The authors compare this
+functions in various ways,
+rearrange their arguments and curry them, and thus they let the
+programmer mix-and-match the basic functional components. The SDF authors compare this
 approach to biological systems that adapt to their environment by configuring
 their basic components (such as cells) in response to environmental changes.
 
 In this post, I translate most examples from SDF Section 2.1 into JavaScript.
 The translation demonstrates the use of JavaScript's rest and spread operators for
 defining a library of function combinators. Since these operators use arrays
-instead of Scheme's lists, you get to see some JavaScript list processing,
-for example various ways to use JavaScript's `splice` method for arrays.
+instead of Scheme's lists, you get to see some JavaScript array processing,
+for example various ways to use the `splice` method for arrays.
 To keep things simple, I don't cover
-the arity manipulation mechanisms of Section 2.1. I skip the examples of
-the section *Multiple values* because JavaScript does not have any
-multiple value return mechanism.
+the arity manipulation mechanisms of SDF Section 2.1. I skip the examples of
+the section *Multiple values* because JavaScript does not have a
+multiple-value return mechanism.
 
 As usual, you can click on the links to play with the programs.
 
 ## Composition of functions
 
-The first combinator composes two functions. The composition
+The first combinator
+composes two functions. The composition
 yields a function `c` that first applies a given function `g` to `c`'s
 arguments, and then applies a given function `f` to the result,
 as shown in the following diagram (Figure 2.1 of SDF).
 
 <img src="https://i.imgur.com/TDdrdJO.jpg" width="500">
 
-The JavaScript implementation of `compose` uses JavaScript's *rest*
+The
+[JavaScript implementation of `compose`](https://share.sourceacademy.org/6g068)
+uses JavaScript's *rest*
 syntax to gather the arguments of the composition into an array
 `args`, and the *spread* syntax to pass each component of the
 `args` array as a separate argument to `g`.
@@ -61,7 +65,9 @@ function iterate(n) {
            : compose(f, iterate(n - 1)(f));
 }
 ```
-The function iterate takes a number `n` as argument and
+The
+[function `iterate`](https://share.sourceacademy.org/qd82p)
+takes a number `n` as argument and
 returns a function that takes a function `f` as argument.
 When applied to a unary function as `f`, the result is
 a function that applies `f` as often to its argument
@@ -91,7 +97,9 @@ the following diagram (Figure 2.2 of SDF).
 
 <img src="https://i.imgur.com/Y3j5RB5.jpg" width="500">
 
-The implementation is straightforward.
+The
+[implementation](https://share.sourceacademy.org/urgqi)
+is straightforward.
 ``` js
 function parallel_combine(h, f, g) {
     return (...args) =>
@@ -112,14 +120,16 @@ diagram (Figure 2.3 of SDF).
 
 <img src="https://i.imgur.com/vT5Pk0e.jpg" width="500">
 
-The implementation uses JavaScript's `length` method
-to find the arity of the given function `f`.
+The
+[implementation](https://share.sourceacademy.org/aluc1)
+uses the `length` attribute of functions
+access their arity.
 ``` js
 function spread_combine(h, f, g) {
-    const n = arity(f);
-    return (...args) =>
-             h(f(...array_take(args, n)),
-               g(...array_drop(args, n)));
+    const f_arity = f.length;
+    return (...args) => 
+             h(f(...array_take(args, f_arity)),
+               g(...array_drop(args, f_arity)));
 }
 ```
 The following example is from SDF.
@@ -166,7 +176,9 @@ diagram (Figure 2.5 of SDF).
 
 <img src="https://i.imgur.com/8fIKAaZ.jpg" width="500">
 
-The implementation uses a non-destructive
+The
+[implementation](https://share.sourceacademy.org/g2h4u)
+uses a non-destructive
 `array_remove` function.
 ``` js
 function discard_argument(i) {
@@ -200,7 +212,9 @@ the result function, as depicted in the following diagram
 
 <img src="https://i.imgur.com/6pka4Rk.jpg" width="500">
 
-The implementation uses a non-destructive `array_insert`
+The
+[implementation](https://share.sourceacademy.org/95qiq)
+uses a non-destructive `array_insert`
 method.
 ``` js
 function curry_argument(i) {
@@ -230,14 +244,16 @@ function array_insert(a, index, value) {
 array_insert([1,2,3,4], 2, 44);
 // result: [1, 2, 44, 3, 4]
 ```
-The final combinator allows the programmer to
+The final combinator of this post allows the programmer to
 rearrange the arguments to be passed to a given
 function, following a specified permutation, as
 depicted in the following diagram (Figure 2.7 in SDF).
 
 <img src="https://i.imgur.com/L908LWL.jpg" width="500">
 
-The implementation uses a `make_permutation` function
+The
+[implementation](https://share.sourceacademy.org/p8ucq)
+uses a `make_permutation` function
 the returns the actual `permute` function, which
 performs the argument permutation according to the
 given specification.
