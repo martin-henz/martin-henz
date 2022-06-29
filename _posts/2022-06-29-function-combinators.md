@@ -16,7 +16,7 @@ programmer mix-and-match the basic functional components. The SDF authors compar
 approach to biological systems that adapt to their environment by configuring
 their basic components (such as cells) in response to environmental changes.
 
-In this post, I translate most examples from SDF Section 2.1 into JavaScript.
+In this blog post, I translate most examples from SDF Section 2.1 into JavaScript.
 The translation demonstrates the use of JavaScript's rest and spread operators for
 defining a library of function combinators. Since these operators use arrays
 instead of Scheme's lists, you get to see some JavaScript array processing,
@@ -55,6 +55,22 @@ compose(x => ["foo", x],
         (x, y, z) => ["bar", x, y, z])("a", "b", "c");
 // result: ["foo", ["bar", "a", "b", "c"]]
 ```
+**A digression:** I personally find the asymmetry of this `compose`
+function quite unfortunate: `g` can take multiple arguments, but
+`f` only takes one. SDF mitigates the issue using
+Scheme's multiple-value return mechanism later in Section 2.1.
+I find that mechanism
+rather cumbersome and much prefer the approach taken by "modern"
+functional programming languages such as OCaml and Haskell,
+where all functions take exactly one argument. Multiple arguments
+are passed either in compound data structures or by currying.
+Then the asymmetry
+disappears, and the combinators of this blog post all operate
+on compound data or curried functions
+that combine the intended arguments, rather than
+using JavaScript's rest and spread operators or Scheme's dot notation.
+Of course, that would require a major redesign of JavaScript/Scheme...
+
 Unary functions (functions that take only one argument) can
 be repeatedly applied using the following function `iterate`.
 ``` js
