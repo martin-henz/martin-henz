@@ -221,7 +221,7 @@ array_remove([1,2,3,4], 1);
 // result: [1, 3, 4]
 ```
 The following version of the technique of *currying*
-supplies given all arguments except one to the given function
+supplies all given arguments except one to the given function
 `f`. The missing argument is then passed separately to
 the result function, as depicted in the following diagram
 (Figure 2.6 of SDF).
