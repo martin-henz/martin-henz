@@ -268,7 +268,7 @@ depicted in the following diagram (Figure 2.7 in SDF).
 <img src="https://i.imgur.com/L908LWL.jpg" width="500">
 
 The
-[implementation](https://share.sourceacademy.org/p8ucq)
+[implementation](https://share.sourceacademy.org/vsjkf)
 uses a `make_permutation` function
 that returns the actual `permute` function, which
 performs the argument permutation according to the
@@ -293,7 +293,7 @@ The `make_permutation` function is straightforward.
 function make_permutation(permspec) {
     return a => {
         const result = [];
-        const a_len = array_length(permspec);
+        const a_len = permspec.length;
         for (let i = 0; i < a_len; i = i + 1) {
             result[i] = a[permspec[i]];
         }
