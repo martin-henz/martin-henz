@@ -6,7 +6,7 @@ tags: SDF
 
 Section 2.1 of the book
 [Software Design for Flexibility](https://mitpress.mit.edu/books/software-design-flexibility)
-(SDF)
+(SDF) by Chris Hanson and Gerald Jay Sussman
 introduces function combinators that allow a programmer 
 to describe basic functional components and *combine*
 them in order build a more complex system. The presented combinators compose
