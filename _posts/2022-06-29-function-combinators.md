@@ -139,7 +139,7 @@ diagram (Figure 2.3 of SDF).
 The
 [implementation](https://share.sourceacademy.org/aluc1)
 uses the `length` attribute of functions
-access their arity.
+to access their arity.
 ``` js
 function spread_combine(h, f, g) {
     const f_arity = f.length;
@@ -270,7 +270,7 @@ depicted in the following diagram (Figure 2.7 in SDF).
 The
 [implementation](https://share.sourceacademy.org/p8ucq)
 uses a `make_permutation` function
-the returns the actual `permute` function, which
+that returns the actual `permute` function, which
 performs the argument permutation according to the
 given specification.
 ``` js
