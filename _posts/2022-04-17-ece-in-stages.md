@@ -4,16 +4,16 @@ tags: SICP-JS
 
 # An Explicit-control Evaluator in Stages
 
-*last revision: August 24, 2022*
+*last revision: August 26, 2022*
 
 ## In a nutshell
 
 This post describes four implementations of explicit control evaluators. To play with them, click the links:
-* [Calculator language](https://share.sourceacademy.org/5eoge)
-* [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/jqlpy)
-* [Adding blocks, declarations, and names](https://share.sourceacademy.org/mw89a)
-* [Adding functions with implicit return](https://share.sourceacademy.org/7t29t)
-* [Adding return statements](https://share.sourceacademy.org/7mg4m)
+* [Calculator language](https://share.sourceacademy.org/eiec9)
+* [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
+* [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
+* [Adding functions with implicit return](https://share.sourceacademy.org/dvp26)
+* [Adding return statements](https://share.sourceacademy.org/439yr)
 
 ## Motivation
 
@@ -30,10 +30,10 @@ I'm going to fix this: I will present an evaluator that runs in a simple loop th
 be implemented in a low-level language without recursion, and functions that give rise to
 iterative processes in JavaScript also give rise to iterative processes when evaluated using
 this interpreter. To avoid recursion, I make control explicit by
-storing the expressions and statements that need to be evaluated as *continuations*, by
+storing the expressions and statements that need to be evaluated as *agenda*, by
 using an explicit *operand stack*, and 
 by augmenting the language with *instructions* that operate on this operand stack.
-The evaluator is naturally tail-recursive, because it only saves continuations and
+The evaluator is naturally tail-recursive, because it only saves agendas and
 environments if they are needed after function calls.
 As in the previous post, I proceed in stages
 to gently introduce the features of evaluators for increasingly powerful sublanguages of
@@ -41,10 +41,7 @@ JavaScript.
 
 ## An explicit-control evaluator for a calculator language
 
-As in the previous post,
-we start with a calculator sublanguage of JavaScript. A program in such a language is a single expression
-statement, and the expression consists of numbers and the binary operators `+`, `-`, `*`, and `/`.
-A typical "program" looks like this:
+As in the previous post, we start with a calculator sublanguage of JavaScript. A program in such a language is a single expression statement, and the expression consists of numbers and the binary operators `+`, `-`, `*`, and `/`. A typical "program" looks like this:
 ``` js
 1 + 2 * 3 - 4;
 ```
@@ -89,36 +86,31 @@ function list_of_values(exprs) {
 }
 ```
 Instead of relying on recursion and `map`, an
-[*explicit-control* evaluator for the calculator language](https://share.sourceacademy.org/5eoge)
+[*explicit-control* evaluator for the calculator language](https://share.sourceacademy.org/eiec9)
 (click on the link to play with the program) stores the
-remaining operand expressions as a *continuation*, a list of expressions that still need to be evaluated
+remaining operand expressions as a *agenda*, a list of expressions that still need to be evaluated
 once the evaluation of the current expression is done. Intermediate evaluation results are stored
 in a data structure called the *operand stack*. Here is an outline of the new `evaluate` function.
 ``` js
 function evaluate(program) {
-    let components = list(program);
+    let agenda = list(program);
     let operands = null;
-    while (! is_null(components)) {
-        const component = head(components);
-        const continuation = tail(components);
+    while (! is_null(agenda)) {
+        const component = head(agenda);
+        agenda = tail(agenda);
 	...
     }
     return head(operands);
 }
 ```
-It consists of a while loop that processes the first of a list of components,
-starting with the one-element list containing the given calculator program.
-The evaluation is done when there are no more components to evaluate, in which case
-the final result is the only remaining element on the operand stack.
+It consists of a while loop that processes the first of a list of components, called *agenda*, starting with the one-element list containing the given calculator program. The evaluation is done when there are no more components in the agenda, in which case the final result is the only remaining element on the operand stack.
 
-When the first
-component is a literal, its value its pushed on the operand stack.
+When the first component is a literal, its value its pushed on the operand stack.
 ``` js
-    while (! is_null(components)) {
-        const component = head(components);
-        const continuation = tail(components);
+    while (! is_null(agenda)) {
+        const component = head(agenda);
+        agenda = tail(agenda);
         if (is_literal(component)) {
-            components = continuation;
             operands = pair(literal_value(component), operands);
         } else // handle remaining cases
         } else {
@@ -128,22 +120,19 @@ component is a literal, its value its pushed on the operand stack.
     return head(operands);
 } 
 ```
-When the loop encounters a binary operator combination, it prepends to the continuation
-the two operand expressions and a *binary operator instruction*, which is a data structure that 
-contains the operator symbol.
+When the loop encounters a binary operator combination, it prepends to the agenda the two operand expressions and a *binary operator instruction*, which is a data structure that contains the operator symbol.
 ``` js
         } else if (is_operator_comb(component)) {
-            components = 
+            agenda = 
                 pair(operator_comb_first_operand(component),
                      pair(operator_comb_second_operand(component),
                           pair(make_binary_operator_instruction(
                                    operator_comb_operator_symbol(
                                        component)),
-                               continuation)));
+                               agenda)));
         } else ...
 ```
-Like statements and expressions, binary operator instructions are represented by tagged data 
-structures.
+Like statements and expressions, binary operator instructions are represented by tagged data structures.
 ``` js
 function make_binary_operator_instruction(operator) {
     return list("binary_operator_instruction", operator);
@@ -155,12 +144,9 @@ function binary_operator_instruction_operator(x) {
     return head(tail(x));
 }
 ```
-Evaluation of a binary operator instruction pops two operands from the operand stack, applies
-the operator on them using the `apply` function (see the recursive evaluator of the calculator
-language in the previous post), and pushes the result back on the operand stack.
+Evaluation of a binary operator instruction pops two operands from the operand stack, applies the operator on them using the `apply` function (see the recursive evaluator of the calculator language in the previous post), and pushes the result back on the operand stack.
 ``` js
         } else if (is_binary_operator_instruction(component)) {
-            components = continuation;
             operands = pair(apply(binary_operator_instruction_operator(
                                       component), 
                                   list(head(operands), 
@@ -168,42 +154,26 @@ language in the previous post), and pushes the result back on the operand stack.
                             tail(tail(operands)));
         } else ...
 ```
-You can look at this approach of evaluating binary operator combinations
-as a *compilation* step performed on the fly: A binary operator combination is
-evaluated by "compiling" it into a binary operator instruction that is stored in
-the continuation, behind the operand expressions. Another way to look at it is
-that the given expression is translated on the fly into postfix notation.
+You can look at this approach of evaluating binary operator combinations as a *compilation* step performed on the fly: A binary operator combination is evaluated by "compiling" it into a binary operator instruction that is stored in the agenda, behind the operand expressions. Another way to look at it is that the given expression is translated on the fly into postfix notation.
 
-In this post, we use `parse_and_evaluate` functions that look like the corresponding
-functions in the previous post, but that use the `evaluate` functions of this post.
-For example, `parse_and_evaluate("1 + 2 * 3 - 4;"));` computes the number 3 using
-an iterative process that the iterative `evaluate` function above gives rise to.
+In this post, we use `parse_and_evaluate` functions that look like the corresponding functions in the previous post, but that use the `evaluate` functions of this post. For example, `parse_and_evaluate("1 + 2 * 3 - 4;"));` computes the number 3 using an iterative process that the iterative `evaluate` function above gives rise to.
 
 ## Adding booleans, conditionals, and sequences
 
-The [next explicit-control evaluator](https://share.sourceacademy.org/jqlpy) 
-extends the calculator language by
-adding the boolean values `true` and
-`false`, conditional expressions and sequences of statements. As noted in the previous post, 
-the component
-statements of a sequence are evaluated in the order in which they appear, and the result
-in the case of this JavaScript sublanguage is the result of evaluating the last statement
-of the sequence. The result of evaluating the program
+The [next explicit-control evaluator](https://share.sourceacademy.org/wd3sb) extends the calculator language by adding the boolean values `true` and `false`, conditional expressions and sequences of statements. As noted in the previous post, the component statements of a sequence are evaluated in the order in which they appear, and the result in the case of this JavaScript sublanguage is the result of evaluating the last statement of the sequence. The result of evaluating the program
 ``` js
 8 + 34; true ? 1 + 2 : 17;
 ```
 is therefore 3.
 
-The explicit-control evaluator handles a conditional by moving its predicate into the
-continuation, before a new *branch instruction*, which stores the consequent and alternative
-expressions.
+The explicit-control evaluator handles a conditional by moving its predicate into the agenda, before a new *branch instruction*, which stores the consequent and alternative expressions.
 ``` js
       } else if (is_conditional(component)) {
-          components =
+          agenda =
               pair(conditional_predicate(component),
                    pair(make_branch(conditional_consequent(component),
                                     conditional_alternative(component)),
-                        continuation));
+                        agenda));
       } else ...			
 ```
 Like operator instructions, branch instructions are tagged data structures.
@@ -221,33 +191,29 @@ function branch_alternative(component) {
    return list_ref(component, 2);
 }
 ```
-Evaluation of a branch instruction expects the result of evaluating the predicate on
-the operand stack, and uses it to determining whether the consequent or the alternative
-expression of the branch instruction should be prepended to the continuation.
+Evaluation of a branch instruction expects the result of evaluating the predicate on the operand stack, and uses it to determining whether the consequent or the alternative expression of the branch instruction should be prepended to the agenda.
 ``` js
       } else if (is_branch(component)) {
-          components = pair(is_truthy(head(operands))
+          agenda = pair(is_truthy(head(operands))
                             ? branch_consequent(component)
                             : branch_alternative(component),
-                            continuation);
+                            agenda);
           operands = tail(operands);
       } else ...
 ```
 The evaluation of sequences proceeds by prepending the components of the sequence
-to the continuation.
+to the agenda.
 ``` js
       } else if (is_sequence(component)) {
-          components = prepend_statements(sequence_statements(component),
-                                          continuation);
+          agenda = prepend_statements(sequence_statements(component),
+                                      agenda);
       } else ...
 ```
-The function `prepend_statements` compiles the sequence into the continuation such
-that the statements of the sequence are separated by pop instructions (here using an
-imperative while loop to emphasize the iterative nature of the evaluator).
+The function `prepend_statements` compiles the sequence into the agenda such that the statements of the sequence are separated by pop instructions (here using an imperative while loop to emphasize the iterative nature of the evaluator).
 ``` js
-function prepend_statements(statements, continuation) {
+function prepend_statements(statements, agenda) {
     if (is_null(statements)) {
-        return continuation;
+        return agenda;
     } else {
         let current_read_pointer = statements;
         const result = pair(head(statements), undefined);
@@ -260,16 +226,14 @@ function prepend_statements(statements, continuation) {
             set_tail(current_write_pointer, pop_pair);
             current_write_pointer = tail(tail(current_write_pointer));
         }
-        set_tail(current_write_pointer, continuation);
+        set_tail(current_write_pointer, agenda);
         return result;
     }
 }
 ```
-The result of evaluating every sequence component except the last one
-is popped from the operand stack by the pop instruction.
+The result of evaluating every sequence component except the last one is popped from the operand stack by the pop instruction.
 ``` js
       } else if (is_pop_instruction(component)) {
-          components = continuation;
           operands = tail(operands);
       } else ...
 ```
@@ -282,8 +246,7 @@ generated by `prepare_statements`.
 
 ## Adding blocks, declarations, and names
 
-The [next evaluator](https://share.sourceacademy.org/mw89a) adds blocks, block-scoped `const` declarations,
-and names. A typical example is
+The [next evaluator](https://share.sourceacademy.org/wdldj) adds blocks, block-scoped `const` declarations, and names. A typical example is
 ``` js
 const y = 4; 
 {
@@ -291,58 +254,48 @@ const y = 4;
     x * 2;
 }
 ```
-which evaluates to 22 because in the program, the name `y` is declared to be 4, and in the
-block (delimited by braces `{...}`) the name `x` is declared to refer to `y + 7`, i.e. 11.
+which evaluates to 22 because in the program, the name `y` is declared to be 4, and in the block (delimited by braces `{...}`) the name `x` is declared to refer to `y + 7`, i.e. 11.
 
-Similar to the recursive evaluator for blocks, declarations, and names, 
-the explicit-control evaluator for blocks, declarations, and names uses
-an environment that keeps track of the names that are declared in any
-given scope and the values that these names refer to at any given time. 
+Similar to the recursive evaluator for blocks, declarations, and names, the explicit-control evaluator for blocks, declarations, and names uses an environment that keeps track of the names that are declared in any given scope and the values that these names refer to at any given time. 
 ``` js
 function evaluate(program) {
-    let components = list(program);
+    let agenda = list(program);
     let operands = null;
     let environment = the_empty_environment;
-    while (!is_null(components)) {
-        const component = head(components);
-        const continuation = tail(components);
+    while (!is_null(agenda)) {
+        const component = head(agenda);
+        agenda = tail(agenda);
         ...
     }
     return head(operands);
 } 
 ```
-The evaluation of
-a name occurrence looks up the value associated with the symbol (string) of the name in the
-environment using `lookup_symbol_value` and pushes it onto the operand stack.
+The evaluation of a name occurrence looks up the value associated with the symbol (string) of the name in the environment using `lookup_symbol_value` and pushes it onto the operand stack.
 ``` js
         } else if (is_name(component)) {
-            components = continuation;
             operands = pair(lookup_symbol_value(symbol_of_name(component), 
                                                 environment),
                             operands);
         } else ...
 ```
-Similar to the recursive evaluator, the explicit-control evaluator
-handles blocks by scanning out the local names that are declared in the block body and binding
-them to their initial value `*unassigned*` in a new environment with respect to which the
-body is evaluated.
+Similar to the recursive evaluator, the explicit-control evaluator handles blocks by scanning out the local names that are declared in the block body and binding them to their initial value `*unassigned*` in a new environment with respect to which the body is evaluated.
 ``` js
         } else if (is_block(component)) {
             const body = block_body(component);
             const locals = scan_out_declarations(body);
-            components = pair(body, 
-                              needs_current_environment(continuation)
-                              ? pair(make_restore_environment_instruction(
-                                         environment),
-                                     continuation)
-                              : continuation);
+            agenda = pair(body, 
+                          needs_current_environment(agenda)
+                          ? pair(make_restore_environment_instruction(
+                                     environment),
+                                 agenda)
+                          : agenda);
             environment = extend_environment(locals,
                                              list_of_unassigned(locals),
                                              environment);                              
         } else ...
 ```
-Between the body and the continuation, a restore-environment instruction is inserted
-if the continuation may need the current environment.
+Between the body and the agenda, a restore-environment instruction is inserted
+if the agenda may need the current environment.
 ``` js
 function make_restore_environment_instruction(env) {
     return list("restore_environment_instruction", env);
@@ -354,37 +307,29 @@ function restore_environment_instruction_environment(instr) {
     return head(tail(instr));
 }
 ```
-If there is any chance
-that the current environment is needed, for example in a branch of a conditional,
-the function `needs_current_environment` must return true. 
+If there is any chance that the current environment is needed, for example in a branch of a conditional, the function `needs_current_environment` must return true. 
 ``` js
-function needs_current_environment(components) {
-    return ! is_null(components) && 
-           ! is_restore_environment_instruction(head(components));
+function needs_current_environment(agenda) {
+    return ! is_null(agenda) && 
+           ! is_restore_environment_instruction(head(agenda));
 }
 ```
-This version of `needs_current_environment` is
-quite simple and conservative. Feel free to experiment with more sophisticated
-versions that avoid the creation of restore-environment instructions in more
-cases.
+This version of `needs_current_environment` is quite simple and conservative. Feel free to experiment with more sophisticated versions that avoid the creation of restore-environment instructions in more cases.
 
-The evaluation of a restore-environment instruction establishes the environment
-before it was extended when the scope was entered.
+The evaluation of a restore-environment instruction establishes the environment before it was extended when the scope was entered.
 ``` js
         } else if (is_restore_environment_instruction(component)) {
-            components = continuation;
             environment = restore_environment_instruction_environment(
                               component);
         } else ...
 ```
-Constant declarations are evaluated by moving the value expression into the continuation
-in front of a new assign instruction.
+Constant declarations are evaluated by moving the value expression into the agenda in front of a new assign instruction.
 ``` js
         } else if (is_declaration(component)) {
-            components = pair(declaration_value_expression(component),
+            agenda = pair(declaration_value_expression(component),
                               pair(make_assign_instruction(
                                        declaration_symbol(component)),
-                                   continuation));
+                                   agenda));
         } else ...
 ```
 and an assign instruction uses the `assign_symbol_value` function as did
@@ -394,7 +339,6 @@ the recursive evaluator.
             assign_symbol_value(assign_symbol(component),
                                 head(operands),
                                 environment);
-            components = continuation;
 	} else ...
 ```
 In JavaScript, the value of an assignment is the assigned value,
@@ -434,7 +378,7 @@ yields the expected value 22.
 ## Adding functions (with implicit return)
 
 The
-[next evaluator](https://share.sourceacademy.org/7t29t) introduces functions without the need for for
+[next evaluator](https://share.sourceacademy.org/dvp26) introduces functions without the need for for
 return statements. For example, the function `fact` in this language
 ``` js
 function fact(n) {
@@ -443,15 +387,11 @@ function fact(n) {
 ```
 computes the factorial function for positive integers.
 
-To make this happen in an explicit-control evaluator, the `evaluate` function
-in the this evaluator
-needs to include cases for function declarations, lambda expressions, and
-function applications. Function declarations are translated to constant declarations
-as you have seen in the recursive evaluator.
+To make this happen in an explicit-control evaluator, the `evaluate` function in the this evaluator needs to include cases for function declarations, lambda expressions, and function applications. Function declarations are translated to constant declarations as you have seen in the recursive evaluator.
 ``` js
         } else if (is_function_declaration(component)) {
-            components = pair(function_decl_to_constant_decl(component), 
-                              continuation);
+            agenda = pair(function_decl_to_constant_decl(component), 
+                              agenda);
         } else ...
 ```
 The evaluation of lambda expressions pushes a function object on the operand stack.
@@ -459,7 +399,6 @@ The parameter list is reversed to match the arguments of a function call, which
 will appear on the operand stack in reverse order.
 ``` js
         } else if (is_lambda_expression(component)) {
-            components = continuation;
             operands = pair(make_function(reverse(lambda_parameter_symbols(
                                                       component)),
                                           lambda_body(component), 
@@ -471,9 +410,8 @@ Operator combinations are treated as function applications, using the function
 `operator_comb_to_application`.
 ``` js
         } else if (is_operator_combination(component)) {
-            components = pair(operator_combination_to_application(
-                                  component),
-                              continuation);
+            agenda = pair(operator_combination_to_application(component),
+                          agenda);
         } else ...
 ```
 The final task for this evaluator is to handle function application. To make control
@@ -484,11 +422,11 @@ using a *call instruction*.
 ``` js
         } else if (is_application(component)) {
             const argument_expressions = arg_expressions(component);
-            components = pair(function_expression(component),
-                              append(argument_expressions,
-                                     pair(make_call_instruction(
-                                              length(argument_expressions)),
-                                          continuation)));
+            agenda = pair(function_expression(component),
+                          append(argument_expressions,
+                                 pair(make_call_instruction(
+                                          length(argument_expressions)),
+                                      agenda)));
 ```
 The call instruction remembers the number of arguments
 ``` js
@@ -512,7 +450,6 @@ find the callee function: the function to be applied.
             const callee = head(callee_and_remaining_operands);
             operands = tail(callee_and_remaining_operands);
             if (is_primitive_function(callee)) {
-                components = continuation;
                 operands = pair(apply_in_underlying_javascript(
                                     primitive_implementation(callee),
                                     args),
@@ -521,38 +458,23 @@ find the callee function: the function to be applied.
                 const callee_environment = function_environment(callee);
                 const callee_body = function_body(callee);
                 const callee_parameters = function_parameters(callee);
-                components = pair(callee_body, 
-                                  needs_current_environment(continuation)
-                                  ? pair(make_restore_environment_instruction(
-                                             environment),
-                                         continuation)
-                                  : continuation);
-                environment = extend_environment(
-                                        callee_parameters,
-                                        args,
-                                        callee_environment);
+                agenda = pair(callee_body, 
+                              needs_current_environment(agenda)
+                              ? pair(make_restore_environment_instruction(
+                                         environment),
+                                     agenda)
+                              : agenda);
+                environment = extend_environment(callee_parameters,
+                                                 args,
+                                                 callee_environment);
             } 
         } else ...
 ```
-If the callee function is primitive, the function `apply_in_underlying_javascript` carries
-out the application. If the function is compound, the body of the function
-is prepended to the continuation. Similar to the evaluation of blocks, a restore-environment
-instruction is inserted if the continuation may need the current environment.
-The new environment with respect to which the body is evaluated is the result
-of extending the function's environment with a binding of the parameters (taken from
-the function value) to the arguments (taken from the operand stack), both in reverse order.
+If the callee function is primitive, the function `apply_in_underlying_javascript` carries out the application. If the function is compound, the body of the function is prepended to the agenda. Similar to the evaluation of blocks, a restore-environment instruction is inserted if the agenda may need the current environment. The new environment with respect to which the body is evaluated is the result of extending the function's environment with a binding of the parameters (taken from the function value) to the arguments (taken from the operand stack), both in reverse order.
 
-This evaluator is quite naturally tail-recursive. If the continuation of a call instruction
-starts with
-a restore-environment instruction from a previous call instruction or evaluation of
-a block, there is no need to save the current environment in another restore-environment
-instruction. The evaluator treats tail-recursive functions as loops in which the
-function body is evaluated in an environment that extends the function's environment
-with a binding of the parameters to the evaluated arguments. In particular,
-tail-recursive functions do not consume memory in the continuation.
+This evaluator is quite naturally tail-recursive. If the agenda of a call instruction starts with a restore-environment instruction from a previous call instruction or evaluation of a block, there is no need to save the current environment in another restore-environment instruction. The evaluator treats tail-recursive functions as loops in which the function body is evaluated in an environment that extends the function's environment with a binding of the parameters to the evaluated arguments. In particular, tail-recursive functions do not consume memory in the agenda.
 
-In order to provide bindings for predeclared names, the function `parse_and_evaluate`
-uses `the_global_environment` from the previous post as its initial environment.
+In order to provide bindings for predeclared names, the function `parse_and_evaluate` uses `the_global_environment` from the previous post as its initial environment.
 ``` js
 function parse_and_evaluate(program) {
     return evaluate(make_block(parse(program)), 
@@ -573,11 +495,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final evaluator](https://share.sourceacademy.org/7mg4m)
-handles return statements, a prominent feature in languages like C, Java, Python, and
-JavaScript. Return statements allow the programmer to return from a function from anywhere in its
-body. Whatever statements in the body that remain to be evaluated are ignored.
-For example, in JavaScript, the program
+The [final evaluator](https://share.sourceacademy.org/439yr) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
 ``` js
 function f(x) {
     if (true) {
@@ -591,81 +509,9 @@ function f(x) {
 }
 f(1);
 ```
-results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the
-caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise
-remain to be evaluated in the body.
+results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise remain to be evaluated in the body.
 
-The difficulty with evaluating explicit return statements is that evaluation needs to abandon the
-remaining statements of the function, regardless whether any block statements surround
-the return statement or whether any statements follow the returns statement in a statement sequence.
-The `evaluate` function cannot rely on the continuation to find the place
-where evaluation should resume after evaluating a return statement.
-Instead, a new variable called `runtime_stack` keeps track of the
-continuation after returning from a function call and the environment
-with respect to which to evaluate it.
-``` js
-function evaluate(program) {
-    let components = list(program);
-    let operands = null;
-    let environment = the_global_environment;
-    let runtime_stack = list(make_runtime_stack_frame(null, 
-                                                      the_empty_environment));
-    while (! is_null(components)) {
-        const component = head(components);
-        const continuation = tail(components);
-        if ( is_literal(component)) {
-            components = continuation;
-            operands = pair(literal_value(component), operands);
-        } else ... // remaining kinds of components
-        } else {
-            return error(component, "Unknown component: ");
-        }
-    }
-    return head(operands);
-} 
-```
-I will explain below why the runtime stack initially contains
-a stack frame that has an empty continuation and an empty environment.
-
-Runtime stack frames are tagged lists, as usual.
-``` js
-function make_runtime_stack_frame(comps, env) {
-    return list("runtime_stack_frame", comps, env);
-}
-function runtime_stack_frame_components(sf) {
-    return head(tail(sf));
-}
-function runtime_stack_frame_environment(sf) {
-    return head(tail(tail(sf)));
-}
-```
-The evaluation of a return statement abandons the current continuation
-and instead installs the return expression as continuation, followed by 
-a restore-continuation instruction.
-``` js
-        } else if (is_return_statement(component)) {
-            components = list(return_expression(component),
-                              make_restore_continuation_instruction());
-        } else ...
-```
-The restore-continuation instruction restores the continuation and
-environment using the frame at the top of the runtime stack.
-``` js
-        } else if (is_restore_continuation_instruction(component)) {
-            const top_of_runtime_stack = head(runtime_stack);
-            components = runtime_stack_frame_components(
-                             top_of_runtime_stack);
-            environment = runtime_stack_frame_environment(
-                              top_of_runtime_stack);
-            runtime_stack = tail(runtime_stack);
-        } else ...
-```
-The call instruction installs the function body as continuation, without
-including the current continuation, because it is the job of the return
-statement in the callee function to reestablish the continuation. For this
-purpose, the call instruction checks whether the current continuation
-is needed, and if so, it pushes a new runtime stack frame on the
-runtime stack. 
+The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The call instruction will do that by placing a marker on the agenda, followed by a reset-environment instruction, roughly like this.
 ``` js
         } else if (is_call_instruction(component)) {
             const arity = call_instruction_arity(component);
@@ -674,49 +520,67 @@ runtime stack.
             const callee = head(callee_and_remaining_operands);
             operands = tail(callee_and_remaining_operands);
             if (is_primitive_function(callee)) {
-                components = continuation;
-                operands = pair(apply_in_underlying_javascript(
-                                    primitive_implementation(callee),
-                                    args),
-                                operands);
+                ...
             } else {
                 const callee_environment = function_environment(callee);
                 const callee_body = function_body(callee);
                 const callee_parameters = function_parameters(callee);
-                components = list(callee_body);
-                if (needs_current_continuation(continuation)) {
-                    runtime_stack = pair(make_runtime_stack_frame(
-                                             continuation, environment),
-                                         runtime_stack);
-                }
+                agenda = pair(callee_body,
+                              pair(make_marker(),
+                                   pair(make_restore_environment_instruction(
+                                            environment),
+                                        agenda)));
                 environment = extend_environment(callee_parameters,
                                                  args,
                                                  callee_environment);
             } 
         } else ...
 ```
-The current continuation is not needed if the first instruction of
-the continuation is a restore-continuation instruction.
+where `make_marker` is represented as a tagged list like the other components on the agenda.
 ``` js
-function needs_current_continuation(components) {
-    return ! is_null(components) &&
-           ! is_restore_continuation_instruction(head(components));
+function make_marker() {
+    return list("marker");
+}
+function is_marker(instr) {
+    return is_tagged_list(instr, "marker");
 }
 ```
-I can now explain why there is an initial frame on the runtime stack before
-the evaluation loop starts. The reason is that if the last statement of the
-program is a call of a tail-recursive function, the last restore-continuation
-instruction will pop a frame from the runtime stack without the initial call
-having pushed any frame. Starting with an initial frame on the runtime stack takes
-care of this situation.
-
-In JavaScript, the value `undefined` is returned if the evaluation of the function body
-does not encounter any return statements. The following modification in the evaluation
-of lambda expressions achieves this effect by appending a `return undefined;` to every
-function body.
+With such a preparation, return statements can be implemented by placing a reset-agenda instruction after the return expression in the agenda.
+``` js
+        } else if (is_return_statement(component)) {
+            agenda = pair(return_expression(component),
+                          pair(make_reset_agenda_instruction(),
+                               agenda));
+        } else ...
+```
+where reset-agenda instructions are tagged lists.
+``` js
+function make_reset_agenda_instruction() {
+    return list("reset_agenda_instruction");
+}
+function is_reset_agenda_instruction(instr) {
+    return is_tagged_list(instr, "reset_agenda_instruction");
+}
+```
+The reset-agenda instruction resets the agenda by abandoning all components until the most-recently placed marker.
+``` js
+        } else if (is_reset_agenda_instruction(component)) {
+            agenda = pop_until_marker(agenda);
+        } else ...
+```
+where `pop_until_marker` is declared as follows.
+``` js
+function pop_until_marker(agenda) {
+    while (! (head(head(agenda)) === "marker")) {
+        agenda = tail(agenda);
+    }
+    return tail(agenda);
+}
+```
+In JavaScript, the value `undefined` is returned if the evaluation of the function body does not encounter any return statements. The following modification in the evaluation of lambda expressions achieves this effect by appending a `return undefined;` to every function body.
 ``` js
         } else if (is_lambda_expression(component)) {
-            components = continuation;
+            components = agenda;
             operands = pair(make_function(reverse(lambda_parameter_symbols(component)),
                                           make_sequence(
                                               list(lambda_body(component),
@@ -729,20 +593,48 @@ function body.
                           operands);
         } else ...
 ```
-In contrast with the recursive evaluator, this explicit control evaluator
-does not need to handle any special "return values" during the evaluation of function bodies.
-The evaluation of sequences and function application remains unaffected by return statements.
+In contrast with the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences and function application remains unaffected by return statemen
 
-Like the previous evaluator, this evaluator is quite naturally tail-recursive.
-If the continuation of a call instruction starts with
-a restore-continuation instruction from an enclosing return statement,
-there is no need to save the current current continuation and environment
-in a new runtime-stack frame. Instead, the next restore-continuation instruction
-that actually gets executed will directly return to the previously saved
-continuation and environment.
+The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of the call instruction looks like this.
+``` js
+        } else if (is_call_instruction(component)) {
+            const arity = call_instruction_arity(component);
+            const args = take(operands, arity);
+            const callee_and_remaining_operands = drop(operands, arity);
+            const callee = head(callee_and_remaining_operands);
+            operands = tail(callee_and_remaining_operands);
+            if (is_primitive_function(callee)) {
+                operands = pair(apply_in_underlying_javascript(
+                                    primitive_implementation(callee),
+                                    args),
+                                operands);
+            } else {
+                const callee_environment = function_environment(callee);
+                const callee_body = function_body(callee);
+                const callee_parameters = function_parameters(callee);
+                agenda = pair(callee_body,
+                              tail_call(agenda)
+                              ? agenda
+                              : pair(make_marker(),
+                                     pair(make_restore_environment_instruction(
+                                              environment),
+                                          agenda)));
+                environment = extend_environment(callee_parameters,
+                                                 args,
+                                                 callee_environment);
+            } 
+        } else ...
+```
+The function `is_tail_call` only needs to check whether the next instruction on the agenda is a reset-agenda instruction.
+``` js
+function is_tail_call(agenda) {
+    return ! is_null(agenda) &&
+           is_reset_agenda_instruction(head(agenda));
+}
+```
+This evaluator is now tail-recursive, like the previous evaluator. If the agenda of a call instruction starts with a reset-agenda instruction from an enclosing return statement, there is no need to place a marker or save the current environment on the agendae. Instead, the reset-agenda instruction will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
 
-The factorial function above needs to have a `return` added, because otherwise
-it would always return `undefined`. The example program
+The factorial function above needs to have a `return` added, because otherwise it would always return `undefined`. The example program
 ``` js
 parse_and_evaluate(`               
 function factorial(n) {
@@ -759,7 +651,7 @@ space consumption comes from runtime stack frames that are pushed on the runtime
 stack for every function call.
 
 The following evaluation has constant space consumption because the recursive
-call of `fact_iter` detects that the next instruction is a restore-continuation
+call of `fact_iter` detects that the next instruction is a restore-agenda
 instruction and avoids pushing a new frame on the runtime stack.
 ``` js
 parse_and_evaluate(`
@@ -778,7 +670,7 @@ fact(5);
 ```
 If you choose to use conditional expressions rather than conditional statements,
 the recursive call of `fact_iter` still detects that the next instruction is
-a restore-continuation instruction.
+a restore-agenda instruction.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -795,12 +687,12 @@ fact(5);
 The reason for this is that by the time
 the call instruction gets evaluated, the branch instruction from the surrounding
 conditional expression has been handled already. The next instruction after the
-call instruction is a restore-continuation instruction as in the previous
+call instruction is a restore-agenda instruction as in the previous
 version of the program.
 
 ## Outlook
 
-This evaluator makes control explicit by keeping track of continuations. To do so,
+This evaluator makes control explicit by keeping track of agendas. To do so,
 it translates complex expressions such as function applications into sequences
 of instructions. The next post will take this idea further, by *compiling* the
 entire program into a sequence of instruction, thereby cleanly separating
