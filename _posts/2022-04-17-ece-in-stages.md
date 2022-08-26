@@ -581,7 +581,8 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
 ``` js
         } else if (is_lambda_expression(component)) {
             components = agenda;
-            operands = pair(make_function(reverse(lambda_parameter_symbols(component)),
+            operands = pair(make_function(reverse(lambda_parameter_symbols(
+	                                              component)),
                                           make_sequence(
                                               list(lambda_body(component),
                                                    // insert 
@@ -613,7 +614,7 @@ The only remaining issue lies in tail calls. The call instruction as shown above
                 const callee_body = function_body(callee);
                 const callee_parameters = function_parameters(callee);
                 agenda = pair(callee_body,
-                              tail_call(agenda)
+                              is_tail_call(agenda)
                               ? agenda
                               : pair(make_marker(),
                                      pair(make_restore_environment_instruction(
@@ -632,7 +633,7 @@ function is_tail_call(agenda) {
            is_reset_agenda_instruction(head(agenda));
 }
 ```
-This evaluator is now tail-recursive, like the previous evaluator. If the agenda of a call instruction starts with a reset-agenda instruction from an enclosing return statement, there is no need to place a marker or save the current environment on the agendae. Instead, the reset-agenda instruction will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
+This evaluator is now tail-recursive, like the previous evaluator. If the agenda of a call instruction starts with a reset-agenda instruction from an enclosing return statement, there is no need to place a marker or save the current environment on the agenda. Instead, the reset-agenda instruction will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
 
 The factorial function above needs to have a `return` added, because otherwise it would always return `undefined`. The example program
 ``` js
@@ -651,7 +652,7 @@ space consumption comes from runtime stack frames that are pushed on the runtime
 stack for every function call.
 
 The following evaluation has constant space consumption because the recursive
-call of `fact_iter` detects that the next instruction is a restore-agenda
+call of `fact_iter` detects that the next instruction is a reset-agenda
 instruction and avoids pushing a new frame on the runtime stack.
 ``` js
 parse_and_evaluate(`
@@ -670,7 +671,7 @@ fact(5);
 ```
 If you choose to use conditional expressions rather than conditional statements,
 the recursive call of `fact_iter` still detects that the next instruction is
-a restore-agenda instruction.
+a reset-agenda instruction.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -687,15 +688,15 @@ fact(5);
 The reason for this is that by the time
 the call instruction gets evaluated, the branch instruction from the surrounding
 conditional expression has been handled already. The next instruction after the
-call instruction is a restore-agenda instruction as in the previous
+call instruction is a reset-agenda instruction as in the previous
 version of the program.
 
 ## Outlook
 
-This evaluator makes control explicit by keeping track of agendas. To do so,
+This evaluator makes control explicit by keeping track of an agenda. To do so,
 it translates complex expressions such as function applications into sequences
 of instructions. The next post will take this idea further, by *compiling* the
-entire program into a sequence of instruction, thereby cleanly separating
+entire program into a sequence of instructions, thereby cleanly separating
 compilation of a program from execution of the *machine code* that
 results from the compilation.
 
