@@ -13,7 +13,7 @@ This post describes five implementations of explicit control evaluators. To play
 * [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
 * [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
 * [Adding functions with implicit return](https://share.sourceacademy.org/dvp26)
-* [Adding return statements](https://share.sourceacademy.org/439yr)
+* [Adding return statements](https://share.sourceacademy.org/tqhr0)
 
 ## Motivation
 
@@ -495,7 +495,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final evaluator](https://share.sourceacademy.org/439yr) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
+The [final evaluator](https://share.sourceacademy.org/tqhr0) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
 ``` js
 function f(x) {
     if (true) {
@@ -511,30 +511,15 @@ f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise remain to be evaluated in the body.
 
-The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The call instruction will do that by placing a marker on the agenda, followed by a reset-environment instruction, roughly like this.
+The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a reset-environment instruction, roughly like this.
 ``` js
-        } else if (is_call_instruction(component)) {
-            const arity = call_instruction_arity(component);
-            const args = take(operands, arity);
-            const callee_and_remaining_operands = drop(operands, arity);
-            const callee = head(callee_and_remaining_operands);
-            operands = tail(callee_and_remaining_operands);
-            if (is_primitive_function(callee)) {
                 ...
-            } else {
-                const callee_environment = function_environment(callee);
-                const callee_body = function_body(callee);
-                const callee_parameters = function_parameters(callee);
                 agenda = pair(callee_body,
                               pair(make_marker(),
                                    pair(make_restore_environment_instruction(
                                             environment),
                                         agenda)));
-                environment = extend_environment(callee_parameters,
-                                                 args,
-                                                 callee_environment);
-            } 
-        } else ...
+                ...
 ```
 where `make_marker` is represented as a tagged list like the other components on the agenda.
 ``` js
@@ -596,23 +581,9 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
 ```
 In contrast with the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences and function application remains unaffected by return statemen
 
-The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of the call instruction looks like this.
+The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of agenda update in the call instruction looks like this.
 ``` js
-        } else if (is_call_instruction(component)) {
-            const arity = call_instruction_arity(component);
-            const args = take(operands, arity);
-            const callee_and_remaining_operands = drop(operands, arity);
-            const callee = head(callee_and_remaining_operands);
-            operands = tail(callee_and_remaining_operands);
-            if (is_primitive_function(callee)) {
-                operands = pair(apply_in_underlying_javascript(
-                                    primitive_implementation(callee),
-                                    args),
-                                operands);
-            } else {
-                const callee_environment = function_environment(callee);
-                const callee_body = function_body(callee);
-                const callee_parameters = function_parameters(callee);
+                ...
                 agenda = pair(callee_body,
                               is_tail_call(agenda)
                               ? agenda
@@ -620,11 +591,7 @@ The only remaining issue lies in tail calls. The call instruction as shown above
                                      pair(make_restore_environment_instruction(
                                               environment),
                                           agenda)));
-                environment = extend_environment(callee_parameters,
-                                                 args,
-                                                 callee_environment);
-            } 
-        } else ...
+                ...
 ```
 The function `is_tail_call` only needs to check whether the next instruction on the agenda is a reset-agenda instruction.
 ``` js
@@ -635,6 +602,20 @@ function is_tail_call(agenda) {
 ```
 This evaluator is now tail-recursive, like the previous evaluator. If the agenda of a call instruction starts with a reset-agenda instruction from an enclosing return statement, there is no need to place a marker or save the current environment on the agenda. Instead, the reset-agenda instruction will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
 
+To save unnecessary restore-environment instructions, we can use the same technique as in the previous evaluator, and check in the agenda update of the call instruction whether the environment is needed. That idea leads us to the final version of the call instruction.
+``` js
+                ...
+                agenda = pair(callee_body,
+                              is_tail_call(agenda)
+                              ? agenda
+                              : pair(make_marker(),
+                                     needs_current_environment(agenda)
+                                     ? pair(make_restore_environment_instruction(
+                                                environment),
+                                            agenda)
+                                     : agenda));
+                ...
+```
 The factorial function above needs to have a `return` added, because otherwise it would always return `undefined`. The example program
 ``` js
 parse_and_evaluate(`               
