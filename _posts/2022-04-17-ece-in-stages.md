@@ -13,7 +13,7 @@ This post describes five implementations of explicit control evaluators. To play
 * [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
 * [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
 * [Adding functions with implicit return](https://share.sourceacademy.org/dvp26)
-* [Adding return statements](https://share.sourceacademy.org/tqhr0)
+* [Adding return statements](https://share.sourceacademy.org/1kght)
 
 ## Motivation
 
@@ -495,7 +495,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final evaluator](https://share.sourceacademy.org/tqhr0) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
+The [final evaluator](https://share.sourceacademy.org/1kght) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
 ``` js
 function f(x) {
     if (true) {
@@ -511,7 +511,7 @@ f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise remain to be evaluated in the body.
 
-The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a reset-environment instruction, roughly like this.
+The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a restore-environment instruction, as a first approximation like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
@@ -556,7 +556,7 @@ The reset-agenda instruction resets the agenda by abandoning all components unti
 where `pop_until_marker` is declared as follows.
 ``` js
 function pop_until_marker(agenda) {
-    while (! (head(head(agenda)) === "marker")) {
+    while (head(head(agenda)) !== "marker") {
         agenda = tail(agenda);
     }
     return tail(agenda);
@@ -571,7 +571,7 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
                                           make_sequence(
                                               list(lambda_body(component),
                                                    // insert 
-                                                   // return undefined
+                                                   // return undefined;
                                                    make_return_statement(
                                                        make_literal(
                                                            undefined)))),
@@ -579,7 +579,7 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
                           operands);
         } else ...
 ```
-In contrast with the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences and function application remains unaffected by return statemen
+In contrast with the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences remains unaffected by return statements.
 
 The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of agenda update in the call instruction looks like this.
 ``` js
