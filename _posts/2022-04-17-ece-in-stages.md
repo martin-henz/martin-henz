@@ -8,7 +8,7 @@ tags: SICP-JS
 
 ## In a nutshell
 
-This post describes four implementations of explicit control evaluators. To play with them, click the links:
+This post describes five implementations of explicit control evaluators. To play with them, click the links:
 * [Calculator language](https://share.sourceacademy.org/eiec9)
 * [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
 * [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
