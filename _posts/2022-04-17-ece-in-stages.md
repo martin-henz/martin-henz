@@ -12,8 +12,8 @@ This post describes five implementations of explicit control evaluators. To play
 * [Calculator language](https://share.sourceacademy.org/eiec9)
 * [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
 * [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
-* [Adding functions with implicit return](https://share.sourceacademy.org/dvp26)
-* [Adding return statements](https://share.sourceacademy.org/1kght)
+* [Adding functions with implicit return](https://share.sourceacademy.org/47g89)
+* [Adding return statements](https://share.sourceacademy.org/lp544)
 
 ## Motivation
 
@@ -378,7 +378,7 @@ yields the expected value 22.
 ## Adding functions (with implicit return)
 
 The
-[next evaluator](https://share.sourceacademy.org/dvp26) introduces functions without the need for return statements. For example, the function `fact` in this language
+[next evaluator](https://share.sourceacademy.org/47g89) introduces functions without the need for return statements. For example, the function `fact` in this language
 ``` js
 function fact(n) {
     n === 1 ? 1 : n * fact(n - 1);
@@ -494,7 +494,7 @@ gives the expected result of 24.
 
 ## Adding return statements
 
-The [final evaluator](https://share.sourceacademy.org/1kght) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
+The [final evaluator](https://share.sourceacademy.org/lp544) handles return statements, a prominent feature in languages like C, Java, Python, and JavaScript. Return statements allow a function to return from anywhere in its body. Whatever statements in the body that would normally remain to be evaluated are ignored. For example, in JavaScript, the program
 ``` js
 function f(x) {
     if (true) {
