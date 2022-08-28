@@ -4,7 +4,7 @@ tags: SICP-JS
 
 # An Explicit-control Evaluator in Stages
 
-*last revision: August 26, 2022*
+*last revision: August 28, 2022*
 
 ## In a nutshell
 
@@ -195,9 +195,9 @@ Evaluation of a branch instruction expects the result of evaluating the predicat
 ``` js
       } else if (is_branch(component)) {
           agenda = pair(is_truthy(head(operands))
-                            ? branch_consequent(component)
-                            : branch_alternative(component),
-                            agenda);
+                        ? branch_consequent(component)
+                        : branch_alternative(component),
+                        agenda);
           operands = tail(operands);
       } else ...
 ```
@@ -378,8 +378,7 @@ yields the expected value 22.
 ## Adding functions (with implicit return)
 
 The
-[next evaluator](https://share.sourceacademy.org/dvp26) introduces functions without the need for for
-return statements. For example, the function `fact` in this language
+[next evaluator](https://share.sourceacademy.org/dvp26) introduces functions without the need for return statements. For example, the function `fact` in this language
 ``` js
 function fact(n) {
     n === 1 ? 1 : n * fact(n - 1);
@@ -387,7 +386,7 @@ function fact(n) {
 ```
 computes the factorial function for positive integers.
 
-To make this happen in an explicit-control evaluator, the `evaluate` function in the this evaluator needs to include cases for function declarations, lambda expressions, and function applications. Function declarations are translated to constant declarations as you have seen in the recursive evaluator.
+To make this happen in an explicit-control evaluator, the `evaluate` function needs to include cases for function declarations, lambda expressions, and function applications. Function declarations are translated to constant declarations as you have seen in the recursive evaluator.
 ``` js
         } else if (is_function_declaration(component)) {
             agenda = pair(function_decl_to_constant_decl(component), 
@@ -511,7 +510,7 @@ f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise remain to be evaluated in the body.
 
-The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda to find the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a restore-environment instruction, as a first approximation like this.
+The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda by marking the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a restore-environment instruction, as a first approximation like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
@@ -579,9 +578,9 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
                           operands);
         } else ...
 ```
-In contrast with the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences remains unaffected by return statements.
+In contrast to the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences remains unaffected by return statements.
 
-The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of agenda update in the call instruction looks like this.
+The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless of whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of agenda update in the call instruction looks like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
