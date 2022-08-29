@@ -4,14 +4,14 @@ tags: SICP-JS
 
 # An Explicit-control Evaluator in Stages
 
-*last revision: August 28, 2022*
+*last revision: August 29, 2022*
 
 ## In a nutshell
 
 This post describes five implementations of explicit control evaluators. To play with them, click the links:
-* [Calculator language](https://share.sourceacademy.org/eiec9)
+* [Calculator language](https://share.sourceacademy.org/jvchr)
 * [Adding booleans, conditionals, and sequences](https://share.sourceacademy.org/wd3sb)
-* [Adding blocks, declarations, and names](https://share.sourceacademy.org/wdldj)
+* [Adding blocks, declarations, and names](https://share.sourceacademy.org/p36zw)
 * [Adding functions with implicit return](https://share.sourceacademy.org/47g89)
 * [Adding return statements](https://share.sourceacademy.org/lp544)
 
@@ -86,7 +86,7 @@ function list_of_values(exprs) {
 }
 ```
 Instead of relying on recursion and `map`, an
-[*explicit-control* evaluator for the calculator language](https://share.sourceacademy.org/eiec9)
+[*explicit-control* evaluator for the calculator language](https://share.sourceacademy.org/jvchr)
 (click on the link to play with the program) stores the
 remaining operand expressions as a *agenda*, a list of expressions that still need to be evaluated
 once the evaluation of the current expression is done. Intermediate evaluation results are stored
@@ -144,13 +144,13 @@ function binary_operator_instruction_operator(x) {
     return head(tail(x));
 }
 ```
-Evaluation of a binary operator instruction pops two operands from the operand stack, applies the operator on them using the `apply` function (see the recursive evaluator of the calculator language in the previous post), and pushes the result back on the operand stack.
+Evaluation of a binary operator instruction pops two operands from the operand stack (where the first operand is below the second operand on the operand stack), applies the operator on them using the `apply` function (see the recursive evaluator of the calculator language in the previous post), and pushes the result back on the operand stack.
 ``` js
         } else if (is_binary_operator_instruction(component)) {
             operands = pair(apply(binary_operator_instruction_operator(
                                       component), 
-                                  list(head(operands), 
-                                       head(tail(operands)))),
+                                  list(head(tail(operands)), 
+                                       head(operands))),
                             tail(tail(operands)));
         } else ...
 ```
@@ -160,7 +160,7 @@ In this post, we use `parse_and_evaluate` functions that look like the correspon
 
 ## Adding booleans, conditionals, and sequences
 
-The [next explicit-control evaluator](https://share.sourceacademy.org/wd3sb) extends the calculator language by adding the boolean values `true` and `false`, conditional expressions and sequences of statements. As noted in the previous post, the component statements of a sequence are evaluated in the order in which they appear, and the result in the case of this JavaScript sublanguage is the result of evaluating the last statement of the sequence. The result of evaluating the program
+The [next explicit-control evaluator](https://share.sourceacademy.org/p36zw) extends the calculator language by adding the boolean values `true` and `false`, conditional expressions and sequences of statements. As noted in the previous post, the component statements of a sequence are evaluated in the order in which they appear, and the result in the case of this JavaScript sublanguage is the result of evaluating the last statement of the sequence. The result of evaluating the program
 ``` js
 8 + 34; true ? 1 + 2 : 17;
 ```
