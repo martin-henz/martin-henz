@@ -640,7 +640,7 @@ function factorial(n) {
 factorial(4);`);
 ```
 results in the expected value 24. Since the multiplication with `n` is a
-*deferred operation* (see [SICP JS Section 1.2.1](https://sourceacademy.org/sicpjs/1.2.1#p5), the recursive calls of `factorial` are not tail calls. The explicit-control evaluator has a non-constant
+*deferred operation* (see [SICP JS Section 1.2.1](https://sourceacademy.org/sicpjs/1.2.1#p5)), the recursive calls of `factorial` are not tail calls. The explicit-control evaluator has a non-constant
 space consumption when evaluating applications of this `factorial` function to increasing positive integers. The space consumption comes from markers, restore-environment instructions, and other accumulating components in the agenda.
 
 The following evaluation has constant space consumption because the recursive call of `fact_iter` is a tail call. The corresponding call instruction detects that the next instruction is a reset-agenda instruction and avoids the accumulation of components on the agenda.
