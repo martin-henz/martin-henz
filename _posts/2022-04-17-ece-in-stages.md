@@ -620,7 +620,7 @@ To save unnecessary restore-environment instructions, we can use the same techni
                 ...
                 agenda = pair(callee_body,
                               is_tail_call(agenda)
-                              ? agenda
+                              ? pop_until_marker(agenda)
                               : pair(make_marker(),
                                      needs_current_environment(agenda)
                                      ? pair(make_restore_environment_instruction(
