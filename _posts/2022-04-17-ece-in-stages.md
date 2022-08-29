@@ -471,7 +471,9 @@ find the callee function: the function to be applied.
 ```
 If the callee function is primitive, the function `apply_in_underlying_javascript` carries out the application. If the function is compound, the body of the function is prepended to the agenda. Similar to the evaluation of blocks, a restore-environment instruction is inserted if the agenda may need the current environment. The new environment with respect to which the body is evaluated is the result of extending the function's environment with a binding of the parameters (taken from the function value) to the arguments (taken from the operand stack), both in reverse order.
 
-This evaluator is quite naturally tail-recursive. If the agenda of a call instruction starts with a restore-environment instruction from a previous call instruction or evaluation of a block, there is no need to save the current environment in another restore-environment instruction. The evaluator treats tail-recursive functions as loops in which the function body is evaluated in an environment that extends the function's environment with a binding of the parameters to the evaluated arguments. In particular, tail-recursive functions do not consume memory in the agenda.
+At this point, it is useful to discuss *tail calls*, which are function calls that happen as the last action in a function invocation and that compute the return value of the function in which they appear. An implementation is *tail-recursive* if tail calls do not consume memory. In a tail-recursive implementation, an iterative algorithm can be implemented using tail-recursive functions without concerns about their memory consumption. In JavaScript, tail calls can only happen when the the operand stack is empty, which means that the operand stack won't consume memory. So the question whether the evaluator is tail-recursive boils down to the question whether tail calls add items to the agenda. 
+
+This evaluator is quite naturally tail-recursive. Any tail call instruction on the agenda will be succeeded by the restore-environment instruction from the most-recently executed non-tail call instruction. In that case, there is no need to save the current environment in another restore-environment instruction. The evaluator treats tail-recursive functions as loops in which the function body is evaluated in an environment that extends the function's environment with a binding of the parameters to the evaluated arguments. In particular, tail-recursive functions do not consume memory in the agenda.
 
 In order to provide bindings for predeclared names, the function `parse_and_evaluate` uses `the_global_environment` from the previous post as its initial environment.
 ``` js
@@ -549,7 +551,7 @@ function is_reset_agenda_instruction(instr) {
 The reset-agenda instruction resets the agenda by abandoning all components until the most-recently placed marker.
 ``` js
         } else if (is_reset_agenda_instruction(component)) {
-            agenda = pop_until_marker(agenda);
+            agenda = tail(pop_until_marker(agenda));
         } else ...
 ```
 where `pop_until_marker` is declared as follows.
@@ -558,7 +560,7 @@ function pop_until_marker(agenda) {
     while (head(head(agenda)) !== "marker") {
         agenda = tail(agenda);
     }
-    return tail(agenda);
+    return agenda;
 }
 ```
 In JavaScript, the value `undefined` is returned if the evaluation of the function body does not encounter any return statements. The following modification in the evaluation of lambda expressions achieves this effect by appending a `return undefined;` to every function body.
@@ -580,7 +582,7 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
 ```
 In contrast to the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences remains unaffected by return statements.
 
-The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless of whether that's needed or not. If the call is the last operation to be performed in the body of the function, there is no need for preparing the agenda: The previous call will have done the right preparation. This situation is called a *tail call*, and correspondingly, an improved version of agenda update in the call instruction looks like this.
+The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless of whether that's needed or not. For a tail call, there is no need for placing a marker: The most-recent non-tail call will have placed a marker on the agenda, already, which marks the correct place to reset the agenda to. An improved version of agenda update in the call instruction looks like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
@@ -599,7 +601,19 @@ function is_tail_call(agenda) {
            is_reset_agenda_instruction(head(agenda));
 }
 ```
-This evaluator is now tail-recursive, like the previous evaluator. If the agenda of a call instruction starts with a reset-agenda instruction from an enclosing return statement, there is no need to place a marker or save the current environment on the agenda. Instead, the reset-agenda instruction will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
+Recall however, that return statements are able to jump out of function bodies even if more statements would normally need to be evaluated in the rest of the body. In this evaluator, that means that even in a tail call, there might be components left over between the reset-agenda instruction that comes from the return statement and the next marker. So even if we avoid placing a new marker and restore-environment instruction on the agenda for tail calls, the tail call may result in an accumulation of components on the agenda. Fortunately, this can be easily avoided by reusing our `pop_until_marker` function in the case of tail calls in the implementation of call instructions.
+``` js
+                ...
+                agenda = pair(callee_body,
+                              is_tail_call(agenda)
+                              ? pop_until_marker(agenda)
+                              : pair(make_marker(),
+                                     pair(make_restore_environment_instruction(
+                                              environment),
+                                          agenda)));
+                ...
+```
+With this change, the evaluator is tail-recursive, like the previous evaluator. The function invocation that gave rise to a tail call does not use any memory, neither for a marker nor for a restore-environment instruction nor for any left-over agenda components that have accumulated during the function invocation. The next reset-agenda instruction (from the next return statement that doesn't have a tail call) will reset the agenda to the previous marker, which will be followed by the right restore-environment instruction.
 
 To save unnecessary restore-environment instructions, we can use the same technique as in the previous evaluator, and check in the agenda update of the call instruction whether the environment is needed. That idea leads us to the final version of the call instruction.
 ``` js
