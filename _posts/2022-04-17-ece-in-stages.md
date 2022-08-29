@@ -522,7 +522,7 @@ The difficulty with evaluating explicit return statements is that evaluation nee
                                         agenda)));
                 ...
 ```
-where `make_marker` is represented as a tagged list like the other components on the agenda.
+where a marker is represented as a tagged list like the other components on the agenda.
 ``` js
 function make_marker() {
     return list("marker");
