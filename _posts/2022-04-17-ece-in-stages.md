@@ -640,14 +640,10 @@ function factorial(n) {
 factorial(4);`);
 ```
 results in the expected value 24. Since the multiplication with `n` is a
-*deferred operation*, the explicit-control evaluator has a non-constant
-space consumption when evaluating applications of this `factorial` function. The
-space consumption comes from runtime stack frames that are pushed on the runtime
-stack for every function call.
+*deferred operation* (see [SICP JS Section 1.2.1](https://sourceacademy.org/sicpjs/1.2.1#p5), the recursive calls of `factorial` are not tail calls. The explicit-control evaluator has a non-constant
+space consumption when evaluating applications of this `factorial` function to increasing positive integers. The space consumption comes from markers, restore-environment instructions, and other accumulating components in the agenda.
 
-The following evaluation has constant space consumption because the recursive
-call of `fact_iter` detects that the next instruction is a reset-agenda
-instruction and avoids pushing a new frame on the runtime stack.
+The following evaluation has constant space consumption because the recursive call of `fact_iter` is a tail call. The corresponding call instruction detects that the next instruction is a reset-agenda instruction and avoids the accumulation of components on the agenda.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -664,8 +660,7 @@ fact(5);
 `);
 ```
 If you choose to use conditional expressions rather than conditional statements,
-the recursive call of `fact_iter` still detects that the next instruction is
-a reset-agenda instruction.
+the recursive call of `fact_iter` is still a tail call, and is handled correctly by the evaluator.
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -683,7 +678,7 @@ The reason for this is that by the time
 the call instruction gets evaluated, the branch instruction from the surrounding
 conditional expression has been handled already. The next instruction after the
 call instruction is a reset-agenda instruction as in the previous
-version of the program.
+version of the program, and thus it is handled correctly by the evaluator.
 
 ## Outlook
 
