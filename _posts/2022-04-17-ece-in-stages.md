@@ -471,7 +471,7 @@ find the callee function: the function to be applied.
 ```
 If the callee function is primitive, the function `apply_in_underlying_javascript` carries out the application. If the function is compound, the body of the function is prepended to the agenda. Similar to the evaluation of blocks, a restore-environment instruction is inserted if the agenda may need the current environment. The new environment with respect to which the body is evaluated is the result of extending the function's environment with a binding of the parameters (taken from the function value) to the arguments (taken from the operand stack), both in reverse order.
 
-At this point, it is useful to discuss *tail calls*, which are function calls that happen as the last action in a function invocation and that compute the return value of the function in which they appear. An implementation is *tail-recursive* if tail calls do not consume memory. In a tail-recursive implementation, an iterative algorithm can be implemented using tail-recursive functions without concerns about their memory consumption. In JavaScript, tail calls can only happen when the the operand stack is empty, which means that the operand stack won't consume memory. So the question whether the evaluator is tail-recursive boils down to the question whether tail calls add items to the agenda. 
+At this point, it is useful to discuss *tail calls*, which are function calls that happen as the last action in a function invocation and that compute the return value of the function in which they appear. An implementation is *tail-recursive* if tail calls do not consume memory. In a tail-recursive implementation, an iterative algorithm can be implemented using tail-recursive functions without concerns about their memory consumption. In JavaScript, tail calls can only happen when the operand stack is empty, which means that the operand stack won't consume memory. So the question whether the evaluator is tail-recursive boils down to the question whether tail calls add items to the agenda. 
 
 This evaluator is quite naturally tail-recursive. Any tail call instruction on the agenda will be succeeded by the restore-environment instruction from the most-recently executed non-tail call instruction. In that case, there is no need to save the current environment in another restore-environment instruction. The evaluator treats tail-recursive functions as loops in which the function body is evaluated in an environment that extends the function's environment with a binding of the parameters to the evaluated arguments. In particular, tail-recursive functions do not consume memory in the agenda.
 
@@ -512,7 +512,7 @@ f(1);
 ```
 results in 3 because the evaluation of the body of `f` returns the result of evaluating `x + y` to the caller, ignoring the subsequent expression statements `44;` and `66;` that would otherwise remain to be evaluated in the body.
 
-The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda by marking the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a restore-environment instruction, as a first approximation like this.
+The difficulty with evaluating explicit return statements is that evaluation needs to abandon the remaining statements of the function, regardless of whether any block statements surround the return statement or whether any statements follow the returns statement in a statement sequence. Before evaluating the function body, we need to prepare the agenda by marking the place where evaluation should resume after evaluating a return statement. The compound-function case of the call instruction will do that by placing a marker on the agenda, followed by a restore-environment instruction, as a first approximation like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
@@ -539,7 +539,7 @@ With such a preparation, return statements can be implemented by placing a reset
                                agenda));
         } else ...
 ```
-where reset-agenda instructions are tagged lists.
+where reset-agenda instructions are tagged lists as usual.
 ``` js
 function make_reset_agenda_instruction() {
     return list("reset_agenda_instruction");
@@ -548,13 +548,13 @@ function is_reset_agenda_instruction(instr) {
     return is_tagged_list(instr, "reset_agenda_instruction");
 }
 ```
-The reset-agenda instruction resets the agenda by abandoning all components until the most-recently placed marker.
+The reset-agenda instruction resets the agenda by abandoning all components until the most-recently placed marker. The marker itself is abandoned too.
 ``` js
         } else if (is_reset_agenda_instruction(component)) {
             agenda = tail(pop_until_marker(agenda));
         } else ...
 ```
-where `pop_until_marker` is declared as follows.
+The function `pop_until_marker` is declared as follows.
 ``` js
 function pop_until_marker(agenda) {
     while (head(head(agenda)) !== "marker") {
@@ -563,7 +563,7 @@ function pop_until_marker(agenda) {
     return agenda;
 }
 ```
-In JavaScript, the value `undefined` is returned if the evaluation of the function body does not encounter any return statements. The following modification in the evaluation of lambda expressions achieves this effect by appending a `return undefined;` to every function body.
+In JavaScript, the value `undefined` is returned if the evaluation of the function body does not encounter any return statements. The following modification of the evaluation of lambda expressions achieves this effect by appending a `return undefined;` to every function body.
 ``` js
         } else if (is_lambda_expression(component)) {
             components = agenda;
@@ -582,7 +582,7 @@ In JavaScript, the value `undefined` is returned if the evaluation of the functi
 ```
 In contrast to the recursive evaluator, this explicit control evaluator does not need to handle any special "return values" during the evaluation of function bodies. The evaluation of sequences remains unaffected by return statements.
 
-The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless of whether that's needed or not. For a tail call, there is no need for placing a marker: The most-recent non-tail call will have placed a marker on the agenda, already, which marks the correct place to reset the agenda to. An improved version of agenda update in the call instruction looks like this.
+The only remaining issue lies in tail calls. The call instruction as shown above places a marker and a restore-environment instruction on the agenda, regardless of whether that's needed or not. For a tail call, there is no need for placing a marker: The most-recent non-tail call will have placed a marker on the agenda already, which marks the correct place to reset the agenda to. An improved version of agenda update in the call instruction looks like this.
 ``` js
                 ...
                 agenda = pair(callee_body,
@@ -659,8 +659,7 @@ function fact_iter(n, i, acc) {
 fact(5);
 `);
 ```
-If you choose to use conditional expressions rather than conditional statements,
-the recursive call of `fact_iter` is still a tail call, and is handled correctly by the evaluator.
+If you choose to use conditional expressions rather than conditional statements like this
 ``` js
 parse_and_evaluate(`
 function fact(n) {
@@ -674,7 +673,8 @@ function fact_iter(n, i, acc) {
 fact(5);
 `);
 ```
-The reason for this is that by the time
+the recursive call of `fact_iter` is still a tail call, and is handled correctly by the
+evaluator. The reason for this is that by the time
 the call instruction gets evaluated, the branch instruction from the surrounding
 conditional expression has been handled already. The next instruction after the
 call instruction is a reset-agenda instruction as in the previous
